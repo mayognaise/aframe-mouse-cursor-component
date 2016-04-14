@@ -9,8 +9,7 @@
     "dist": "webpack index.js dist/aframe-mouse-cursor-component.js && webpack -p index.js dist/aframe-mouse-cursor-component.min.js",
     "postpublish": "npm run dist",
     "preghpages": "npm run build && rm -rf gh-pages && cp -r examples gh-pages",
-    "ghpages": "npm run preghpages && ghpages -p gh-pages",
-    "unboil": "node scripts/unboil.js"
+    "ghpages": "npm run preghpages && ghpages -p gh-pages"
   },
   "repository": {
     "type": "git",

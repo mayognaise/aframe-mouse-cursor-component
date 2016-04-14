@@ -1,7 +1,8 @@
 # A-Frame Mouse Cursor Component
 
+## [DEMO](https://mayognaise.github.io/aframe-mouse-cursor-component/basic/index.html)
+
 This is similar to `cursor` component besides the mouse behaves as cursor.
-There is no `mouseenter` or `mouseleave` events but `click` event for mobile.
 
 For detail, please check [cursor page](https://aframe.io/docs/components/cursor.html).
 
@@ -16,6 +17,8 @@ There is no property.
 
 The `mouse-cursor` will add states to the cursor entity on certain events.
 
+**There is no `hovering` or `hovered` state for mobile.**
+
 | State Name | Description |
 | -------- | ----------- |
 | hovering | Added when the cursor is hovering over another entity. |
@@ -28,6 +31,8 @@ The cursor will add states to the target entity on certain events.
 
 
 ## Events
+
+**There is no `mouseenter` or `mouseleave` events but `click` event for mobile.**
 
 | Event Name | Description |
 | -------- | ----------- |

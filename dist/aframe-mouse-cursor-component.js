@@ -68,6 +68,8 @@
 	    this.__isMobile = this.el.sceneEl.isMobile;
 	    this.__isStereo = false;
 	    this.__active = false;
+	    this.__isDown = false;
+	    this.__intersectedEl = null;
 	    this.__attachEventListeners();
 	  },
 
@@ -198,7 +200,7 @@
 	      return;
 	    }
 
-	    this.isDown = true;
+	    this.__isDown = true;
 
 	    if (this.__isMobile) {
 	      this.__updateMouse(evt);
@@ -215,10 +217,10 @@
 	      return;
 	    }
 
-	    if (this.isDown && this.intersectedEl) {
+	    if (this.__isDown && this.__intersectedEl) {
 	      this.__emit('click');
 	    }
-	    this.isDown = false;
+	    this.__isDown = false;
 	  },
 
 
@@ -230,7 +232,9 @@
 	      return;
 	    }
 
-	    this.isDown = false;
+	    if (this.__isMobile) {
+	      this.__isDown = false;
+	    }
 	    this.__updateMouse(evt);
 	    this.__updateIntersectObject();
 	  },
@@ -244,7 +248,7 @@
 	      return;
 	    }
 
-	    this.isDown = false;
+	    this.__isDown = false;
 	  },
 
 
@@ -370,7 +374,7 @@
 	      var _el = obj.parent.el;
 	      /* only updates if the object is not the activated object */
 
-	      if (this.intersectedEl === _el) {
+	      if (this.__intersectedEl === _el) {
 	        return;
 	      }
 	      this.__clearIntersectObject();
@@ -389,7 +393,7 @@
 	   */
 	  __setIntersectObject: function __setIntersectObject(el) {
 
-	    this.intersectedEl = el;
+	    this.__intersectedEl = el;
 	    if (this.__isMobile) {
 	      return;
 	    }
@@ -404,7 +408,7 @@
 	   * @private
 	   */
 	  __clearIntersectObject: function __clearIntersectObject() {
-	    var el = this.intersectedEl;
+	    var el = this.__intersectedEl;
 
 	    if (el && !this.__isMobile) {
 	      el.removeState('hovered');
@@ -412,7 +416,7 @@
 	      this.el.removeState('hovering');
 	    }
 
-	    this.intersectedEl = null;
+	    this.__intersectedEl = null;
 	  },
 
 
@@ -424,11 +428,11 @@
 	   * @private
 	   */
 	  __emit: function __emit(evt) {
-	    var intersectedEl = this.intersectedEl;
+	    var __intersectedEl = this.__intersectedEl;
 
-	    this.el.emit(evt, { target: intersectedEl });
-	    if (intersectedEl) {
-	      intersectedEl.emit(evt);
+	    this.el.emit(evt, { target: __intersectedEl });
+	    if (__intersectedEl) {
+	      __intersectedEl.emit(evt);
 	    }
 	  }
 	});

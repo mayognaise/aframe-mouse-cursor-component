@@ -20,6 +20,8 @@ AFRAME.registerComponent('mouse-cursor', {
     this.__isMobile = this.el.sceneEl.isMobile
     this.__isStereo = false
     this.__active = false
+    this.__isDown = false
+    this.__intersectedEl = null
     this.__attachEventListeners()
   },
 
@@ -139,7 +141,7 @@ AFRAME.registerComponent('mouse-cursor', {
   __onDown (evt) {
     if (!this.__isActive()) { return }
 
-    this.isDown = true
+    this.__isDown = true
 
     if (this.__isMobile) {
       this.__updateMouse(evt)
@@ -153,10 +155,10 @@ AFRAME.registerComponent('mouse-cursor', {
   __onRelease () {
     if (!this.__isActive()) { return }
 
-    if (this.isDown && this.intersectedEl) {
+    if (this.__isDown && this.__intersectedEl) {
       this.__emit('click')
     }
-    this.isDown = false
+    this.__isDown = false
   },
   
   /**
@@ -165,7 +167,9 @@ AFRAME.registerComponent('mouse-cursor', {
   __onMouseMove (evt) {
     if (!this.__isActive()) { return }
 
-    this.isDown = false
+    if (this.__isMobile) {
+      this.__isDown = false
+    }
     this.__updateMouse(evt)
     this.__updateIntersectObject()
   },
@@ -176,7 +180,7 @@ AFRAME.registerComponent('mouse-cursor', {
   __onTouchMove (evt) {
     if (!this.__isActive()) { return }
 
-    this.isDown = false
+    this.__isDown = false
   },
   
   /**
@@ -285,7 +289,7 @@ AFRAME.registerComponent('mouse-cursor', {
       /* get the entity */
       const { el } = obj.parent
       /* only updates if the object is not the activated object */
-      if (this.intersectedEl === el) { return }
+      if (this.__intersectedEl === el) { return }
       this.__clearIntersectObject()
       /* apply new object as intersected */
       this.__setIntersectObject(el)
@@ -302,7 +306,7 @@ AFRAME.registerComponent('mouse-cursor', {
    */
   __setIntersectObject (el) {
 
-    this.intersectedEl = el
+    this.__intersectedEl = el
     if (this.__isMobile) { return }
     el.addState('hovered')
     el.emit('mouseenter')
@@ -316,14 +320,14 @@ AFRAME.registerComponent('mouse-cursor', {
    */
   __clearIntersectObject () {
 
-    const { intersectedEl: el } = this
+    const { __intersectedEl: el } = this
     if (el && !this.__isMobile) {
       el.removeState('hovered')
       el.emit('mouseleave')
       this.el.removeState('hovering')
     }
 
-    this.intersectedEl = null
+    this.__intersectedEl = null
   },
   
 
@@ -336,9 +340,9 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __emit (evt) {
-    const { intersectedEl } = this
-    this.el.emit(evt, { target: intersectedEl })
-    if (intersectedEl) { intersectedEl.emit(evt) }
+    const { __intersectedEl } = this
+    this.el.emit(evt, { target: __intersectedEl })
+    if (__intersectedEl) { __intersectedEl.emit(evt) }
   },
 
 })

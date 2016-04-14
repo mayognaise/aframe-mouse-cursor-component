@@ -1,4 +1,4 @@
-import 'lodash'
+import { flattenDeep } from 'lodash/core'
 
 if (typeof AFRAME === 'undefined') {
   throw 'Component attempted to register before AFRAME was available.'
@@ -210,7 +210,7 @@ AFRAME.registerComponent('mouse-cursor', {
     if (this.__isMobile) {
       const { touches } = evt
       if (!touches || touches.length !== 1) { return }
-      const touch = _.first(touches)
+      const touch = touches[0]
       cx = touch.pageX
       cy = touch.pageY
     }
@@ -232,7 +232,7 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __getChildren (object3D) {
-    return _.map(object3D.children, obj => (obj.type === 'Group')? this.__getChildren(obj) : obj)
+    return object3D.children.map(obj => (obj.type === 'Group')? this.__getChildren(obj) : obj)
   },
   
   /**
@@ -241,7 +241,7 @@ AFRAME.registerComponent('mouse-cursor', {
    */
   __getAllChildren () {
     const children = this.__getChildren(this.el.sceneEl.object3D)
-    return _.flattenDeep(children)
+    return flattenDeep(children)
   },
   
   /*====================================
@@ -269,13 +269,15 @@ AFRAME.registerComponent('mouse-cursor', {
     if (intersects.length > 0) {
       /* get the closest three obj */
       let obj
-      _.each(intersects, item => {
+      intersects.every(item => {
         if (item.object.parent.visible === true) {
           obj = item.object
           return false
         }
+        else {
+          return true
+        }
       })
-      // const obj = _.first(intersects).object
       if (!obj) {
         this.__clearIntersectObject()
         return

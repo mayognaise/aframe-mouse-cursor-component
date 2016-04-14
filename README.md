@@ -1,10 +1,10 @@
 # A-Frame Mouse Cursor Component
 
-## [DEMO](https://mayognaise.github.io/aframe-mouse-cursor-component/basic/index.html)
-
 This is similar to `cursor` component besides the mouse behaves as cursor.
 
 For detail, please check [cursor page](https://aframe.io/docs/components/cursor.html).
+
+**[DEMO](https://mayognaise.github.io/aframe-mouse-cursor-component/basic/index.html)**
 
 ![example](example.gif)
 

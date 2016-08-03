@@ -1,8 +1,12 @@
 import { flattenDeep } from 'lodash/core'
+// import checkHeadsetConnected from 'aframe/src/utils/checkHeadsetConnected'
 
 if (typeof AFRAME === 'undefined') {
   throw 'Component attempted to register before AFRAME was available.'
 }
+
+// const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
+const IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport
 
 /**
  * Mouse Cursor Component for A-Frame.
@@ -202,9 +206,8 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __onEnterVR () {
-    this.__isStereo = true
-    if (this.__isMobile) {
-      this.pause()
+    if (IS_VR_AVAILABLE) {
+      this.__isStereo = true
     }
   },
   
@@ -213,7 +216,6 @@ AFRAME.registerComponent('mouse-cursor', {
    */
   __onExitVR () {
     this.__isStereo = false
-    this.play()
   },
   
 
@@ -227,6 +229,7 @@ AFRAME.registerComponent('mouse-cursor', {
    */
   __getPosition (evt) {
     const { innerWidth: w, innerHeight: h } = window
+
     let cx, cy
     if (this.__isMobile) {
       const { touches } = evt
@@ -239,10 +242,16 @@ AFRAME.registerComponent('mouse-cursor', {
       cx = evt.clientX
       cy = evt.clientY
     }
-    return {
-      x: (cx / w) * 2 - 1,
-      y: - (cy / h) * 2 + 1
+
+    if (this.__isStereo) {
+      cx = (cx % (w/2)) * 2
     }
+
+    const x = (cx / w) * 2 - 1
+    const y = - (cy / h) * 2 + 1
+
+    return { x: x, y: y }
+
   },
   
   /**

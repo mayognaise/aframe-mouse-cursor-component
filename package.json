@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/mayognaise/aframe-mouse-cursor-component#readme",
   "devDependencies": {
-    "aframe": "aframevr/aframe",
+    "aframe": "^0.2.0",
     "aframe-event-set-component": "^3.0.1",
     "babel-core": "^6.7.6",
     "babel-loader": "^6.2.4",

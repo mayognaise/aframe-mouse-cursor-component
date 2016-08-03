@@ -132,7 +132,7 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __isActive () {
-    return !!(this.__active || !this.__isStereo || this.__raycaster)
+    return !!(this.__active || this.__raycaster)
   },
 
   /**
@@ -143,9 +143,11 @@ AFRAME.registerComponent('mouse-cursor', {
 
     this.__isDown = true
 
-    if (this.__isMobile) {
-      this.__updateMouse(evt)
-      this.__updateIntersectObject()
+    this.__updateMouse(evt)
+    this.__updateIntersectObject()
+
+    if (!this.__isMobile) {
+      this.__setInitMousePosition(evt)
     }
   },
   
@@ -155,10 +157,22 @@ AFRAME.registerComponent('mouse-cursor', {
   __onRelease () {
     if (!this.__isActive()) { return }
 
+    /* check if mouse position has updated */
+    if (this.__defMousePosition) {
+      const defX = Math.abs(this.__initMousePosition.x - this.__defMousePosition.x)
+      const defY = Math.abs(this.__initMousePosition.y - this.__defMousePosition.y)
+      const def = Math.max(defX, defY)
+      if (def > 0.04) {
+        /* mouse has moved too much to recognize as click. */
+        this.__isDown = false
+      }
+    }
+
     if (this.__isDown && this.__intersectedEl) {
       this.__emit('click')
     }
     this.__isDown = false
+    this.__resetMousePosition()
   },
   
   /**
@@ -167,11 +181,12 @@ AFRAME.registerComponent('mouse-cursor', {
   __onMouseMove (evt) {
     if (!this.__isActive()) { return }
 
-    if (this.__isMobile) {
-      this.__isDown = false
-    }
     this.__updateMouse(evt)
     this.__updateIntersectObject()
+
+    if (this.__isDown) {
+      this.__setMousePosition(evt)
+    }
   },
   
   /**
@@ -188,7 +203,9 @@ AFRAME.registerComponent('mouse-cursor', {
    */
   __onEnterVR () {
     this.__isStereo = true
-    this.pause()
+    if (this.__isMobile) {
+      this.pause()
+    }
   },
   
   /**
@@ -203,12 +220,12 @@ AFRAME.registerComponent('mouse-cursor', {
   /*=============================
   =            mouse            =
   =============================*/
-  
+
   /**
-   * Update mouse position
+   * Get mouse position
    * @private
    */
-  __updateMouse (evt) {
+  __getPosition (evt) {
     const { innerWidth: w, innerHeight: h } = window
     let cx, cy
     if (this.__isMobile) {
@@ -222,8 +239,41 @@ AFRAME.registerComponent('mouse-cursor', {
       cx = evt.clientX
       cy = evt.clientY
     }
-    this.__mouse.x = (cx / w) * 2 - 1
-    this.__mouse.y = - (cy / h) * 2 + 1
+    return {
+      x: (cx / w) * 2 - 1,
+      y: - (cy / h) * 2 + 1
+    }
+  },
+  
+  /**
+   * Update mouse
+   * @private
+   */
+  __updateMouse (evt) {
+    const { x, y } = this.__getPosition(evt)
+    this.__mouse.x = x
+    this.__mouse.y = y
+  },
+
+
+  /**
+   * Update mouse position
+   * @private
+   */
+  __setMousePosition (evt) {
+    this.__defMousePosition = this.__getPosition(evt)
+  },
+
+  /**
+   * Update initial mouse position
+   * @private
+   */
+  __setInitMousePosition (evt) {
+    this.__initMousePosition = this.__getPosition(evt)
+  },
+
+  __resetMousePosition () {
+    this.__initMousePosition = this.__defMousePosition = null
   },
 
 

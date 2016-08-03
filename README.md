@@ -80,5 +80,11 @@ import 'aframe'
 import 'aframe-mouse-cursor-component'
 ```
 
+## Change log
+
+### 0.2.1
+
+- Now mouse cursor works in stereo mode on both desktop/mobile
+- `click` event won't be fired when mouse moves a lot after mouse down
 
 

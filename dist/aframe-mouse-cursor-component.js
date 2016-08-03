@@ -48,9 +48,14 @@
 
 	var _core = __webpack_require__(1);
 
+	// import checkHeadsetConnected from 'aframe/src/utils/checkHeadsetConnected'
+
 	if (typeof AFRAME === 'undefined') {
 	  throw 'Component attempted to register before AFRAME was available.';
 	}
+
+	// const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
+	var IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport;
 
 	/**
 	 * Mouse Cursor Component for A-Frame.
@@ -188,7 +193,7 @@
 	   * @private
 	   */
 	  __isActive: function __isActive() {
-	    return !!(this.__active || !this.__isStereo || this.__raycaster);
+	    return !!(this.__active || this.__raycaster);
 	  },
 
 
@@ -202,9 +207,11 @@
 
 	    this.__isDown = true;
 
-	    if (this.__isMobile) {
-	      this.__updateMouse(evt);
-	      this.__updateIntersectObject();
+	    this.__updateMouse(evt);
+	    this.__updateIntersectObject();
+
+	    if (!this.__isMobile) {
+	      this.__setInitMousePosition(evt);
 	    }
 	  },
 
@@ -217,10 +224,22 @@
 	      return;
 	    }
 
+	    /* check if mouse position has updated */
+	    if (this.__defMousePosition) {
+	      var defX = Math.abs(this.__initMousePosition.x - this.__defMousePosition.x);
+	      var defY = Math.abs(this.__initMousePosition.y - this.__defMousePosition.y);
+	      var def = Math.max(defX, defY);
+	      if (def > 0.04) {
+	        /* mouse has moved too much to recognize as click. */
+	        this.__isDown = false;
+	      }
+	    }
+
 	    if (this.__isDown && this.__intersectedEl) {
 	      this.__emit('click');
 	    }
 	    this.__isDown = false;
+	    this.__resetMousePosition();
 	  },
 
 
@@ -232,11 +251,12 @@
 	      return;
 	    }
 
-	    if (this.__isMobile) {
-	      this.__isDown = false;
-	    }
 	    this.__updateMouse(evt);
 	    this.__updateIntersectObject();
+
+	    if (this.__isDown) {
+	      this.__setMousePosition(evt);
+	    }
 	  },
 
 
@@ -256,8 +276,9 @@
 	   * @private
 	   */
 	  __onEnterVR: function __onEnterVR() {
-	    this.__isStereo = true;
-	    this.pause();
+	    if (IS_VR_AVAILABLE) {
+	      this.__isStereo = true;
+	    }
 	  },
 
 
@@ -266,7 +287,6 @@
 	   */
 	  __onExitVR: function __onExitVR() {
 	    this.__isStereo = false;
-	    this.play();
 	  },
 
 
@@ -275,13 +295,14 @@
 	  =============================*/
 
 	  /**
-	   * Update mouse position
+	   * Get mouse position
 	   * @private
 	   */
-	  __updateMouse: function __updateMouse(evt) {
+	  __getPosition: function __getPosition(evt) {
 	    var _window = window;
 	    var w = _window.innerWidth;
 	    var h = _window.innerHeight;
+
 
 	    var cx = void 0,
 	        cy = void 0;
@@ -298,8 +319,51 @@
 	      cx = evt.clientX;
 	      cy = evt.clientY;
 	    }
-	    this.__mouse.x = cx / w * 2 - 1;
-	    this.__mouse.y = -(cy / h) * 2 + 1;
+
+	    if (this.__isStereo) {
+	      cx = cx % (w / 2) * 2;
+	    }
+
+	    var x = cx / w * 2 - 1;
+	    var y = -(cy / h) * 2 + 1;
+
+	    return { x: x, y: y };
+	  },
+
+
+	  /**
+	   * Update mouse
+	   * @private
+	   */
+	  __updateMouse: function __updateMouse(evt) {
+	    var _getPosition = this.__getPosition(evt);
+
+	    var x = _getPosition.x;
+	    var y = _getPosition.y;
+
+	    this.__mouse.x = x;
+	    this.__mouse.y = y;
+	  },
+
+
+	  /**
+	   * Update mouse position
+	   * @private
+	   */
+	  __setMousePosition: function __setMousePosition(evt) {
+	    this.__defMousePosition = this.__getPosition(evt);
+	  },
+
+
+	  /**
+	   * Update initial mouse position
+	   * @private
+	   */
+	  __setInitMousePosition: function __setInitMousePosition(evt) {
+	    this.__initMousePosition = this.__getPosition(evt);
+	  },
+	  __resetMousePosition: function __resetMousePosition() {
+	    this.__initMousePosition = this.__defMousePosition = null;
 	  },
 
 

@@ -10,8 +10,8 @@
     <a-scene>
 
       <a-box position="0 3.5 -2" rotation="30 30 0" color="skyblue" roughness="0.8"
-              event-set__1="_event: mouseenter; material.color: yellowgreen; scale: 3 1 1"
-              event-set__2="_event: mouseleave; material.color: skyblue; scale: 1 1 1">
+              event-set="_event: mouseenter; material.color: yellowgreen; scale: 3 1 1,
+                        _event: mouseleave; material.color: skyblue; scale: 1 1 1">
         <a-animation attribute="rotation" begin="click" dur="500" fill="backwards" to="30 30 360"></a-animation>
       </a-box>
 

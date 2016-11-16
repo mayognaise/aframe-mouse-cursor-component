@@ -6,7 +6,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 // const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
-const IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport
+const IS_VR_AVAILABLE = (AFRAME.utils.isMobile || AFRAME.utils.device.isMobile)() || window.hasNonPolyfillWebVRSupport
 
 /**
  * Mouse Cursor Component for A-Frame.

@@ -55,7 +55,13 @@
 	}
 
 	// const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
-	var IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport;
+	var IS_VR_AVAILABLE;
+	if(AFRAME.utils.device != null){
+		// we are using A-frame 0.4.0 or newer
+		IS_VR_AVAILABLE = AFRAME.utils.device.isMobile() || window.hasNonPolyfillWebVRSupport;
+	} else{
+		IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport;
+	}
 
 	/**
 	 * Mouse Cursor Component for A-Frame.

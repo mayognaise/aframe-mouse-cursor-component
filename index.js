@@ -259,9 +259,13 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __updateMouse (evt) {
-    const { x, y } = this.__getPosition(evt)
-    this.__mouse.x = x
-    this.__mouse.y = y
+
+    if(this.__getPosition(evt)!= null){
+      const { x, y } = this.__getPosition(evt)
+      this.__mouse.x = x
+      this.__mouse.y = y
+    }
+
   },
 
 

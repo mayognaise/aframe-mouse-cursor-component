@@ -344,11 +344,13 @@
 	  __updateMouse: function __updateMouse(evt) {
 	    var _getPosition = this.__getPosition(evt);
 
-	    var x = _getPosition.x;
-	    var y = _getPosition.y;
+			if(_getPosition != null){
+				var x = _getPosition.x;
+				var y = _getPosition.y;
 
-	    this.__mouse.x = x;
-	    this.__mouse.y = y;
+				this.__mouse.x = x;
+				this.__mouse.y = y;
+			}
 	  },
 
 

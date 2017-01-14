@@ -6,7 +6,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 // const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
-const IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport
+	const IS_VR_AVAILABLE = (AFRAME.utils.isMobile || AFRAME.utils.device.isMobile)() || window.hasNonPolyfillWebVRSupport
 
 /**
  * Mouse Cursor Component for A-Frame.
@@ -259,9 +259,13 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __updateMouse (evt) {
-    const { x, y } = this.__getPosition(evt)
-    this.__mouse.x = x
-    this.__mouse.y = y
+
+    if(this.__getPosition(evt)!= null){
+      const { x, y } = this.__getPosition(evt)
+      this.__mouse.x = x
+      this.__mouse.y = y
+    }
+
   },
 
 

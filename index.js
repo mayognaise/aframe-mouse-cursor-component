@@ -1,4 +1,4 @@
-import { flattenDeep } from 'lodash/core'
+import flattenDeep from 'lodash.flattendeep'
 // import checkHeadsetConnected from 'aframe/src/utils/checkHeadsetConnected'
 
 if (typeof AFRAME === 'undefined') {
@@ -6,7 +6,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 // const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
-	const IS_VR_AVAILABLE = (AFRAME.utils.isMobile || AFRAME.utils.device.isMobile)() || window.hasNonPolyfillWebVRSupport
+const IS_VR_AVAILABLE = AFRAME.utils.device.isMobile() || window.hasNonPolyfillWebVRSupport
 
 /**
  * Mouse Cursor Component for A-Frame.
@@ -73,7 +73,7 @@ AFRAME.registerComponent('mouse-cursor', {
   /*==============================
   =            events            =
   ==============================*/
-  
+
   /**
    * @private
    */
@@ -103,8 +103,11 @@ AFRAME.registerComponent('mouse-cursor', {
     canvas.addEventListener('touchmove', this.__onTouchMove.bind(this))
     canvas.addEventListener('touchend', this.__onRelease.bind(this))
 
+    /* Element component change */
+    el.addEventListener('componentchanged', this.__onComponentChanged.bind(this))
+
   },
-  
+
   /**
    * @private
    */
@@ -129,8 +132,11 @@ AFRAME.registerComponent('mouse-cursor', {
     canvas.removeEventListener('touchmove', this.__onTouchMove.bind(this))
     canvas.removeEventListener('touchend', this.__onRelease.bind(this))
 
+    /* Element component change */
+    el.removeEventListener('componentchanged', this.__onComponentChanged.bind(this))
+
   },
-  
+
   /**
    * Check if the mouse cursor is active
    * @private
@@ -154,7 +160,7 @@ AFRAME.registerComponent('mouse-cursor', {
       this.__setInitMousePosition(evt)
     }
   },
-  
+
   /**
    * @private
    */
@@ -178,7 +184,7 @@ AFRAME.registerComponent('mouse-cursor', {
     this.__isDown = false
     this.__resetMousePosition()
   },
-  
+
   /**
    * @private
    */
@@ -192,7 +198,7 @@ AFRAME.registerComponent('mouse-cursor', {
       this.__setMousePosition(evt)
     }
   },
-  
+
   /**
    * @private
    */
@@ -201,7 +207,7 @@ AFRAME.registerComponent('mouse-cursor', {
 
     this.__isDown = false
   },
-  
+
   /**
    * @private
    */
@@ -210,14 +216,23 @@ AFRAME.registerComponent('mouse-cursor', {
       this.__isStereo = true
     }
   },
-  
+
   /**
    * @private
    */
   __onExitVR () {
     this.__isStereo = false
   },
-  
+
+  /**
+   * @private
+   */
+  __onComponentChanged (evt) {
+    if (evt.detail.name === 'position') {
+      this.__updateIntersectObject()
+    }
+  },
+
 
   /*=============================
   =            mouse            =
@@ -250,22 +265,19 @@ AFRAME.registerComponent('mouse-cursor', {
     const x = (cx / w) * 2 - 1
     const y = - (cy / h) * 2 + 1
 
-    return { x: x, y: y }
+    return { x, y }
 
   },
-  
+
   /**
    * Update mouse
    * @private
    */
   __updateMouse (evt) {
-
-    if(this.__getPosition(evt)!= null){
-      const { x, y } = this.__getPosition(evt)
-      this.__mouse.x = x
-      this.__mouse.y = y
-    }
-
+    const pos = this.__getPosition(evt)
+    if (pos === null) { return }
+    this.__mouse.x = pos.x
+    this.__mouse.y = pos.y
   },
 
 
@@ -293,7 +305,7 @@ AFRAME.registerComponent('mouse-cursor', {
   /*======================================
   =            scene children            =
   ======================================*/
-  
+
   /**
    * Get non group object3D
    * @private
@@ -301,7 +313,7 @@ AFRAME.registerComponent('mouse-cursor', {
   __getChildren (object3D) {
     return object3D.children.map(obj => (obj.type === 'Group')? this.__getChildren(obj) : obj)
   },
-  
+
   /**
    * Get all non group object3D
    * @private
@@ -310,11 +322,11 @@ AFRAME.registerComponent('mouse-cursor', {
     const children = this.__getChildren(this.el.sceneEl.object3D)
     return flattenDeep(children)
   },
-  
+
   /*====================================
   =            intersection            =
   ====================================*/
-  
+
   /**
    * Update intersect element with cursor
    * @private
@@ -361,7 +373,7 @@ AFRAME.registerComponent('mouse-cursor', {
       this.__clearIntersectObject()
     }
   },
-  
+
   /**
    * Set intersect element
    * @private
@@ -376,7 +388,7 @@ AFRAME.registerComponent('mouse-cursor', {
     this.el.addState('hovering')
 
   },
-  
+
   /**
    * Clear intersect element
    * @private
@@ -392,13 +404,13 @@ AFRAME.registerComponent('mouse-cursor', {
 
     this.__intersectedEl = null
   },
-  
+
 
 
   /*===============================
   =            emitter            =
   ===============================*/
-  
+
   /**
    * @private
    */

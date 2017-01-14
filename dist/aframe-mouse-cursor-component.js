@@ -55,7 +55,7 @@
 	}
 
 	// const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
-	var IS_VR_AVAILABLE = (AFRAME.utils.isMobile || AFRAME.utils.device.isMobile)() || window.hasNonPolyfillWebVRSupport;
+	var IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport;
 
 	/**
 	 * Mouse Cursor Component for A-Frame.
@@ -156,6 +156,9 @@
 	    canvas.addEventListener('touchstart', this.__onDown.bind(this));
 	    canvas.addEventListener('touchmove', this.__onTouchMove.bind(this));
 	    canvas.addEventListener('touchend', this.__onRelease.bind(this));
+
+	    /* Element component change */
+	    el.addEventListener('componentchanged', this.__onComponentChanged.bind(this));
 	  },
 
 
@@ -185,6 +188,9 @@
 	    canvas.removeEventListener('touchstart', this.__onDown.bind(this));
 	    canvas.removeEventListener('touchmove', this.__onTouchMove.bind(this));
 	    canvas.removeEventListener('touchend', this.__onRelease.bind(this));
+
+	    /* Element component change */
+	    el.removeEventListener('componentchanged', this.__onComponentChanged.bind(this));
 	  },
 
 
@@ -290,6 +296,16 @@
 	  },
 
 
+	  /**
+	   * @private
+	   */
+	  __onComponentChanged: function __onComponentChanged(evt) {
+	    if (evt.detail.name === 'position') {
+	      this.__updateIntersectObject();
+	    }
+	  },
+
+
 	  /*=============================
 	  =            mouse            =
 	  =============================*/
@@ -336,15 +352,12 @@
 	   * @private
 	   */
 	  __updateMouse: function __updateMouse(evt) {
+	    var _getPosition = this.__getPosition(evt),
+	        x = _getPosition.x,
+	        y = _getPosition.y;
 
-	    if (this.__getPosition(evt) != null) {
-	      var _getPosition = this.__getPosition(evt),
-	          x = _getPosition.x,
-	          y = _getPosition.y;
-
-	      this.__mouse.x = x;
-	      this.__mouse.y = y;
-	    }
+	    this.__mouse.x = x;
+	    this.__mouse.y = y;
 	  },
 
 
@@ -522,7 +535,7 @@
 	  var undefined;
 
 	  /** Used as the semantic version number. */
-	  var VERSION = '4.17.3';
+	  var VERSION = '4.17.4';
 
 	  /** Error message constants. */
 	  var FUNC_ERROR_TEXT = 'Expected a function';

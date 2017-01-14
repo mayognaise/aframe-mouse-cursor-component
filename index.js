@@ -1,4 +1,4 @@
-import { flattenDeep } from 'lodash/core'
+import flattenDeep from 'lodash.flattendeep'
 // import checkHeadsetConnected from 'aframe/src/utils/checkHeadsetConnected'
 
 if (typeof AFRAME === 'undefined') {
@@ -6,7 +6,7 @@ if (typeof AFRAME === 'undefined') {
 }
 
 // const IS_VR_AVAILABLE = window.hasNativeWebVRImplementation && checkHeadsetConnected()
-const IS_VR_AVAILABLE = AFRAME.utils.isMobile() || window.hasNonPolyfillWebVRSupport
+const IS_VR_AVAILABLE = AFRAME.utils.device.isMobile() || window.hasNonPolyfillWebVRSupport
 
 /**
  * Mouse Cursor Component for A-Frame.
@@ -265,7 +265,7 @@ AFRAME.registerComponent('mouse-cursor', {
     const x = (cx / w) * 2 - 1
     const y = - (cy / h) * 2 + 1
 
-    return { x: x, y: y }
+    return { x, y }
 
   },
 
@@ -274,9 +274,10 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __updateMouse (evt) {
-    const { x, y } = this.__getPosition(evt)
-    this.__mouse.x = x
-    this.__mouse.y = y
+    const pos = this.__getPosition(evt)
+    if (pos === null) { return }
+    this.__mouse.x = pos.x
+    this.__mouse.y = pos.y
   },
 
 

@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/mayognaise/aframe-mouse-cursor-component#readme",
   "devDependencies": {
-    "aframe": "^0.2.0",
+    "aframe": "^0.4.1",
     "aframe-event-set-component": "^0.1.2",
     "babel-core": "^6.7.6",
     "babel-loader": "^6.2.4",
@@ -44,6 +44,6 @@
     "webpack": "^1.12.15"
   },
   "dependencies": {
-    "lodash": "^4.11.1"
+    "lodash.flattendeep": "^4.4.0"
   }
 }

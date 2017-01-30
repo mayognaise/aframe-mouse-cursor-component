@@ -1,6 +1,6 @@
 {
   "name": "aframe-mouse-cursor-component",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A-Frame Mouse Cursor Component for A-Frame VR.",
   "main": "dist/aframe-mouse-cursor-component.js",
   "scripts": {
@@ -41,9 +41,7 @@
     "browserify": "^13.0.0",
     "budo": "^8.2.1",
     "ghpages": "0.0.3",
+    "lodash.flattendeep": "^4.4.0",
     "webpack": "^1.12.15"
-  },
-  "dependencies": {
-    "lodash.flattendeep": "^4.4.0"
   }
 }

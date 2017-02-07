@@ -54,13 +54,13 @@ Install and use by directly including the [browser files](dist):
 ```html
 <head>
   <title>My A-Frame Scene</title>
-  <script src="https://aframe.io/releases/0.2.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/0.4.0/aframe.min.js"></script>
   <script src="https://rawgit.com/mayognaise/aframe-mouse-cursor-component/master/dist/aframe-mouse-cursor-component.min.js"></script>
 </head>
 
 <body>
   <a-scene>
-    <a-entity camera mouse-cursor>
+    <a-entity camera look-controls mouse-cursor>
   </a-scene>
 </body>
 ```

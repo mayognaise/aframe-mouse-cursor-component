@@ -26,6 +26,7 @@ AFRAME.registerComponent('mouse-cursor', {
     this.__active = false
     this.__isDown = false
     this.__intersectedEl = null
+    this.__intersection = null;
     this.__attachEventListeners()
   },
 
@@ -179,7 +180,9 @@ AFRAME.registerComponent('mouse-cursor', {
     }
 
     if (this.__isDown && this.__intersectedEl) {
-      this.__emit('click')
+      this.__emit('click', {
+        intersection: this.__intersection
+      })
     }
     this.__isDown = false
     this.__resetMousePosition()
@@ -347,10 +350,11 @@ AFRAME.registerComponent('mouse-cursor', {
 
     if (intersects.length > 0) {
       /* get the closest three obj */
-      let obj
+      let obj, intersection
       intersects.every(item => {
         if (item.object.parent.visible === true) {
           obj = item.object
+          intersection = item
           return false
         }
         else {
@@ -358,19 +362,22 @@ AFRAME.registerComponent('mouse-cursor', {
         }
       })
       if (!obj) {
-        this.__clearIntersectObject()
+        this.__clearIntersectEl()
+        this.__clearIntersectDetail()
         return
       }
+      /* always update the intersection data */
+      this.__setIntersectDetail(intersection);
       /* get the entity */
       const { el } = obj.parent
       /* only updates if the object is not the activated object */
       if (this.__intersectedEl === el) { return }
-      this.__clearIntersectObject()
+      this.__clearIntersectEl()
       /* apply new object as intersected */
-      this.__setIntersectObject(el)
+      this.__setIntersectEl(el)
     }
     else {
-      this.__clearIntersectObject()
+      this.__clearIntersectEl()
     }
   },
 
@@ -379,7 +386,7 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    * @param {AEntity} el `a-entity` element
    */
-  __setIntersectObject (el) {
+  __setIntersectEl (el) {
 
     this.__intersectedEl = el
     if (this.__isMobile) { return }
@@ -388,12 +395,25 @@ AFRAME.registerComponent('mouse-cursor', {
     this.el.addState('hovering')
 
   },
+  
+  /**
+   * Set intersect detail
+   * @private
+   * @param {Object} intersection returned from THREE.Raycaster.intersectObjects
+   */
+  __setIntersectDetail (intersection) {
+    this.__intersection = intersection
+  },
+  __clearIntersectDetail () {
+    this.__intersection = null
+  },
+  
 
   /**
    * Clear intersect element
    * @private
    */
-  __clearIntersectObject () {
+  __clearIntersectEl () {
 
     const { __intersectedEl: el } = this
     if (el && !this.__isMobile) {
@@ -414,10 +434,11 @@ AFRAME.registerComponent('mouse-cursor', {
   /**
    * @private
    */
-  __emit (evt) {
+  __emit (evt, detail) {
     const { __intersectedEl } = this
-    this.el.emit(evt, { target: __intersectedEl })
-    if (__intersectedEl) { __intersectedEl.emit(evt) }
+    detail = detail || {}
+    this.el.emit(evt, Object.assign({ target: __intersectedEl }, detail))
+    if (__intersectedEl) { __intersectedEl.emit(evt, detail) }
   },
 
 })

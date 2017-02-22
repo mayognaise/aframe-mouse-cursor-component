@@ -66,8 +66,8 @@
 	 */
 	AFRAME.registerComponent('mouse-cursor', {
 	  schema: {
-	    objects: { type: 'string', default: 'a-scene' },
-	    recursive: { default: true }
+	    objects: { type: 'string', default: '*' },
+	    recursive: { default: false }
 	  },
 
 	  /**
@@ -75,7 +75,6 @@
 	   * @protected
 	   */
 	  init: function init() {
-	    console.debug('init');
 	    this.__raycaster = new THREE.Raycaster();
 	    this.__mouse = new THREE.Vector2();
 	    this.__isMobile = this.el.sceneEl.isMobile;
@@ -94,7 +93,7 @@
 	   * @protected
 	   */
 	  update: function update(oldData) {
-	    this.__refreshObjects();
+	    this.__refreshObjects('update');
 	  },
 
 
@@ -106,12 +105,6 @@
 	  remove: function remove() {
 	    this.__removeEventListeners();
 	    this.__raycaster = null;
-	    var refreshObjects = this.__refreshObjects.bind(this);
-	    /* Remove old event listeners */
-	    this.objects.forEach(function (obj) {
-	      //obj.removeEventListener('componentchanged', refreshObjects);
-	      obj.removeEventListener('child-attached', refreshObjects);
-	    });
 	  },
 
 
@@ -162,6 +155,9 @@
 	    /* scene */
 	    sceneEl.addEventListener('enter-vr', this.__onEnterVR.bind(this));
 	    sceneEl.addEventListener('exit-vr', this.__onExitVR.bind(this));
+	    sceneEl.addEventListener('loaded', this.__refreshObjects.bind(this));
+	    sceneEl.addEventListener('child-detached', this.__refreshObjects.bind(this));
+	    sceneEl.addEventListener('child-attached', this.__refreshObjects.bind(this));
 
 	    /* Mouse Events */
 	    canvas.addEventListener('mousedown', this.__onDown.bind(this));
@@ -176,9 +172,6 @@
 
 	    /* Element component change */
 	    el.addEventListener('componentchanged', this.__onComponentChanged.bind(this));
-
-	    /* Refresh objects on scene load */
-	    sceneEl.addEventListener('loaded', this.__refreshObjects.bind(this));
 	  },
 
 
@@ -197,6 +190,9 @@
 	    /* scene */
 	    sceneEl.removeEventListener('enter-vr', this.__onEnterVR.bind(this));
 	    sceneEl.removeEventListener('exit-vr', this.__onExitVR.bind(this));
+	    sceneEl.removeEventListener('child-attached', this.__refreshObjects.bind(this));
+	    sceneEl.removeEventListener('child-detached', this.__refreshObjects.bind(this));
+	    sceneEl.removeEventListener('loaded', this.__refreshObjects.bind(this));
 
 	    /* Mouse Events */
 	    canvas.removeEventListener('mousedown', this.__onDown.bind(this));
@@ -547,59 +543,48 @@
 	   */
 	  __refreshObjects: function __refreshObjects(e) {
 	    var self = this;
-	    var refreshObjects = this.__refreshObjects.bind(this);
-	    /* Remove old event listeners */
-	    this.objects.forEach(function (obj) {
-	      //obj.removeEventListener('componentchanged', refreshObjects);
-	      obj.removeEventListener('child-attached', refreshObjects);
-	    });
-	    /* Reset selectoble objects */
 	    this.objects = [];
-	    var selectedObjects = document.querySelectorAll(this.data.objects);
+	    var selectedObjects = this.el.sceneEl.querySelectorAll(this.data.objects);
 	    selectedObjects.forEach(function (obj) {
-	      /* Attach listeners to selected objects */
-	      // obj.addEventListener('componentchanged', refreshObjects);
-	      obj.addEventListener('child-attached', refreshObjects);
 	      /* adding selected object to object list */
-	      self.objects.push(obj);
-	      /* Recursively add children */
-	      if (self.data.recursive) {
-	        self.__addChildren(obj);
-	      }
+	      self.__addElement(obj, self.data.recursive);
 	    });
 	  },
 
 	  /**
 	   * @private
 	   */
-	  __addChildren: function __addChildren(el) {
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
+	  __addElement: function __addElement(el, recursive) {
+	    var refreshObjects = this.__refreshObjects.bind(this);
+	    this.objects.push(el);
+	    if (recursive) {
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
 
-	    try {
-	      for (var _iterator = el.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        var obj = _step.value;
-
-	        this.objects.push(obj);
-	        this.__addChildren(obj);
-	      }
-	    } catch (err) {
-	      _didIteratorError = true;
-	      _iteratorError = err;
-	    } finally {
 	      try {
-	        if (!_iteratorNormalCompletion && _iterator.return) {
-	          _iterator.return();
+	        for (var _iterator = el.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var obj = _step.value;
+
+	          this.__addElement(obj, recursive);
 	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
 	      } finally {
-	        if (_didIteratorError) {
-	          throw _iteratorError;
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
 	        }
 	      }
-	    }
 
-	    ;
+	      ;
+	    }
 	  },
 
 

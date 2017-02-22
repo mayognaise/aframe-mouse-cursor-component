@@ -452,7 +452,6 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __addElement(el, recursive) {
-    var refreshObjects = this.__refreshObjects.bind(this)
     this.objects.push(el);
     if(recursive){
       for (var obj of el.children){

@@ -12,13 +12,17 @@ const IS_VR_AVAILABLE = AFRAME.utils.device.isMobile() || window.hasNonPolyfillW
  * Mouse Cursor Component for A-Frame.
  */
 AFRAME.registerComponent('mouse-cursor', {
-  schema: { },
+  schema: {
+    objects: { type: 'string', default: 'a-scene' },
+    recursive: { default: true }
+  },
 
   /**
    * Called once when component is attached. Generally for initial setup.
    * @protected
    */
   init () {
+    console.debug('init');
     this.__raycaster = new THREE.Raycaster()
     this.__mouse = new THREE.Vector2()
     this.__isMobile = this.el.sceneEl.isMobile
@@ -27,6 +31,7 @@ AFRAME.registerComponent('mouse-cursor', {
     this.__isDown = false
     this.__intersectedEl = null
     this.__attachEventListeners()
+    this.objects = [];
   },
 
   /**
@@ -34,7 +39,9 @@ AFRAME.registerComponent('mouse-cursor', {
    * Generally modifies the entity based on the data.
    * @protected
    */
-  update (oldData) { },
+  update (oldData) {
+    this.__refreshObjects();
+  },
 
   /**
    * Called when a component is removed (e.g., via removeAttribute).
@@ -44,6 +51,12 @@ AFRAME.registerComponent('mouse-cursor', {
   remove () {
     this.__removeEventListeners()
     this.__raycaster = null
+    var refreshObjects = this.__refreshObjects.bind(this);
+    /* Remove old event listeners */
+    this.objects.forEach(function(obj) {
+      //obj.removeEventListener('componentchanged', refreshObjects);
+      obj.removeEventListener('child-attached', refreshObjects);
+    });
   },
 
   /**
@@ -105,6 +118,9 @@ AFRAME.registerComponent('mouse-cursor', {
 
     /* Element component change */
     el.addEventListener('componentchanged', this.__onComponentChanged.bind(this))
+
+    /* Refresh objects on scene load */
+    sceneEl.addEventListener('loaded', this.__refreshObjects.bind(this));
 
   },
 
@@ -349,7 +365,7 @@ AFRAME.registerComponent('mouse-cursor', {
       /* get the closest three obj */
       let obj
       intersects.every(item => {
-        if (item.object.parent.visible === true) {
+        if (item.object.parent.visible === true && this.__isElementInObjects(item.object.parent.el)) {
           obj = item.object
           return false
         }
@@ -420,4 +436,55 @@ AFRAME.registerComponent('mouse-cursor', {
     if (__intersectedEl) { __intersectedEl.emit(evt) }
   },
 
+
+  /*===============================
+  =       objects selection       =
+  ===============================*/
+
+  /**
+   * @private
+   */
+  __refreshObjects(e) {
+    var self = this;
+    var refreshObjects = this.__refreshObjects.bind(this);
+    /* Remove old event listeners */
+    this.objects.forEach(function(obj){
+      //obj.removeEventListener('componentchanged', refreshObjects);
+      obj.removeEventListener('child-attached', refreshObjects);
+    });
+    /* Reset selectoble objects */
+    this.objects = [];
+    var selectedObjects = document.querySelectorAll(this.data.objects);
+    selectedObjects.forEach(function(obj){
+      /* Attach listeners to selected objects */
+      // obj.addEventListener('componentchanged', refreshObjects);
+      obj.addEventListener('child-attached', refreshObjects);
+      /* adding selected object to object list */
+      self.objects.push(obj);
+      /* Recursively add children */
+      if (self.data.recursive) {
+        self.__addChildren(obj);
+      }
+    });
+  },
+  /**
+   * @private
+   */
+  __addChildren(el) {
+    for (var obj of el.children){
+      this.objects.push(obj);
+      this.__addChildren(obj);
+    };
+  },
+
+  /**
+   * @private
+   */
+  __isElementInObjects(el) {
+    for (var i = 0; i < this.objects.length; i++) {
+      if (this.objects[i] === el)
+        return true;
+    }
+    return false;
+  },
 })

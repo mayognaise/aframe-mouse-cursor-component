@@ -159,6 +159,10 @@ AFRAME.registerComponent('mouse-cursor', {
     if (!this.__isMobile) {
       this.__setInitMousePosition(evt)
     }
+
+    if (this.__intersectedEl) {
+      this.__emit('mousedown')
+    }
   },
 
   /**
@@ -179,8 +183,12 @@ AFRAME.registerComponent('mouse-cursor', {
     }
 
     if (this.__isDown && this.__intersectedEl) {
-      this.__emit('click')
+      if(this.__isDown) {
+        this.__emit('click');
+      }
+      this.__emit('mouseup');
     }
+      
     this.__isDown = false
     this.__resetMousePosition()
   },

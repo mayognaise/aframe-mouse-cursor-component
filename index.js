@@ -26,6 +26,7 @@ AFRAME.registerComponent('mouse-cursor', {
     this.__active = false
     this.__isDown = false
     this.__intersectedEl = null
+    this.__intersection = null
     this.__attachEventListeners()
   },
 
@@ -361,6 +362,7 @@ AFRAME.registerComponent('mouse-cursor', {
         this.__clearIntersectObject()
         return
       }
+      this.__intersection = intersects;
       /* get the entity */
       const { el } = obj.parent
       /* only updates if the object is not the activated object */
@@ -415,9 +417,9 @@ AFRAME.registerComponent('mouse-cursor', {
    * @private
    */
   __emit (evt) {
-    const { __intersectedEl } = this
-    this.el.emit(evt, { target: __intersectedEl })
-    if (__intersectedEl) { __intersectedEl.emit(evt) }
+    const { __intersectedEl, __intersection } = this
+    this.el.emit(evt, { target: __intersectedEl, intersection: __intersection })
+    if (__intersectedEl) { __intersectedEl.emit(evt, {intersection: __intersection}) }
   },
 
 })

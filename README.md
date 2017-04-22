@@ -10,8 +10,25 @@ For detail, please check [cursor page](https://aframe.io/docs/components/cursor.
 
 ## Properties
 
-There is no property.
+| Property Name | Description |
+| -------- | ----------- |
+| objects | {String} Selector to use when limiting the objects to intersect. |
 
+```
+<a-entity
+  position="0 0 0"
+  id="camera"
+  camera
+  mouse-cursor="objects: .intersect-me"
+/>
+
+<a-entity
+  geometry="primitive: circle"
+  material="shader: flat"
+  class="intersect-me"
+  position="0 0 -10"
+/>
+```
 
 ## States
 
@@ -86,5 +103,3 @@ import 'aframe-mouse-cursor-component'
 
 - Now mouse cursor works in stereo mode on both desktop/mobile
 - `click` event won't be fired when mouse moves a lot after mouse down
-
-

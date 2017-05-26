@@ -280,7 +280,7 @@ AFRAME.registerComponent('mouse-cursor', {
 			cy = evt.clientY
 		}
 
-		// account for the offset if scene is embedded
+		/* account for the offset if scene is embedded */
 		cx = cx - offsetW
 		cy = cy - offsetH
 
@@ -415,7 +415,6 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @param {AEntity} el `a-entity` element
 	 */
 	_setIntersectObject (el) {
-
 		this._intersectedEl = el
 		if (this._isMobile) { return }
 		el.addState('hovered')
@@ -429,7 +428,6 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @private
 	 */
 	_clearIntersectObject () {
-
 		const { _intersectedEl: el } = this
 		if (el && !this._isMobile) {
 			el.removeState('hovered')

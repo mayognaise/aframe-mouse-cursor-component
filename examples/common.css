@@ -1,5 +1,6 @@
 html {
   position: inherit !important;
+  font-family: monospace;
 }
 .buttons {
   position: absolute;
@@ -27,9 +28,4 @@ html {
   position: relative;
   pointer-events: none;
   height: 1px;
-}
-
-.content {
-    max-width: 70vw;
-    margin: 0;
 }

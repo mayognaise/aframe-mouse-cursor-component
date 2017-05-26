@@ -90,7 +90,7 @@ If you want to work on this component, take a fork of this branch, and submit a 
 
 ## Change log
 
-### 0.4.1
+### 0.5.0
 
 - Now works accurately with scenes embedded in page
 

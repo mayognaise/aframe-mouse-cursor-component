@@ -25,7 +25,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		this.__isDown = false
 		this.__intersectedEl = null
 		this.__attachEventListeners()
-		this.__canvasSize = false;
+		this.__canvasSize = false
 	},
 
 	/**
@@ -78,7 +78,6 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @private
 	 */
 	__attachEventListeners () {
-
 		const { el } = this
 		const { sceneEl } = el
 		const { canvas } = sceneEl
@@ -91,7 +90,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		window.addEventListener('resize', this.__getCanvasPos.bind(this))
 		document.addEventListener('scroll', this.__getCanvasPos.bind(this))
 		/* update __canvas in case scene is embedded */
-		this.__getCanvasPos();
+		this.__getCanvasPos()
 
 		/* scene */
 		sceneEl.addEventListener('enter-vr', this.__onEnterVR.bind(this))
@@ -255,7 +254,7 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @private
 	 */
 	__getPosition (evt) {
-		const { width: w, height: h, left : offsetW, top : offsetH } = this.__canvasSize;
+		const { width: w, height: h, left : offsetW, top : offsetH } = this.__canvasSize
 
 		let cx, cy
 		if (this.__isMobile) {
@@ -271,8 +270,8 @@ AFRAME.registerComponent('mouse-cursor', {
 		}
 
 		// account for the offset if scene is embedded
-		cx = cx - offsetW;
-		cy = cy - offsetH;
+		cx = cx - offsetW
+		cy = cy - offsetH
 
 		if (this.__isStereo) {
 			cx = (cx % (w/2)) * 2

@@ -6,7 +6,7 @@ For detail, please check [cursor page](https://aframe.io/docs/components/cursor.
 
 **[DEMO](https://mayognaise.github.io/aframe-mouse-cursor-component/index.html)**
 
-![example](example.gif)
+![example](examples/example.gif)
 
 ## Properties
 

@@ -65,7 +65,10 @@
 	 * Mouse Cursor Component for A-Frame.
 	 */
 	AFRAME.registerComponent('mouse-cursor', {
-	  schema: {},
+	  schema: {
+	    objects: { type: 'string', default: '*' },
+	    recursive: { default: false }
+	  },
 
 	  /**
 	   * Called once when component is attached. Generally for initial setup.
@@ -80,6 +83,7 @@
 	    this.__isDown = false;
 	    this.__intersectedEl = null;
 	    this.__attachEventListeners();
+	    this.objects = [];
 	  },
 
 
@@ -88,7 +92,9 @@
 	   * Generally modifies the entity based on the data.
 	   * @protected
 	   */
-	  update: function update(oldData) {},
+	  update: function update(oldData) {
+	    this.__refreshObjects('update');
+	  },
 
 
 	  /**
@@ -149,6 +155,9 @@
 	    /* scene */
 	    sceneEl.addEventListener('enter-vr', this.__onEnterVR.bind(this));
 	    sceneEl.addEventListener('exit-vr', this.__onExitVR.bind(this));
+	    sceneEl.addEventListener('loaded', this.__refreshObjects.bind(this));
+	    sceneEl.addEventListener('child-detached', this.__refreshObjects.bind(this));
+	    sceneEl.addEventListener('child-attached', this.__refreshObjects.bind(this));
 
 	    /* Mouse Events */
 	    canvas.addEventListener('mousedown', this.__onDown.bind(this));
@@ -181,6 +190,9 @@
 	    /* scene */
 	    sceneEl.removeEventListener('enter-vr', this.__onEnterVR.bind(this));
 	    sceneEl.removeEventListener('exit-vr', this.__onExitVR.bind(this));
+	    sceneEl.removeEventListener('child-attached', this.__refreshObjects.bind(this));
+	    sceneEl.removeEventListener('child-detached', this.__refreshObjects.bind(this));
+	    sceneEl.removeEventListener('loaded', this.__refreshObjects.bind(this));
 
 	    /* Mouse Events */
 	    canvas.removeEventListener('mousedown', this.__onDown.bind(this));
@@ -319,9 +331,9 @@
 	   * @private
 	   */
 	  __getPosition: function __getPosition(evt) {
-	    var _window = window;
-	    var w = _window.innerWidth;
-	    var h = _window.innerHeight;
+	    var _window = window,
+	        w = _window.innerWidth,
+	        h = _window.innerHeight;
 
 
 	    var cx = void 0,
@@ -422,9 +434,11 @@
 	   * @private
 	   */
 	  __updateIntersectObject: function __updateIntersectObject() {
-	    var __raycaster = this.__raycaster;
-	    var el = this.el;
-	    var __mouse = this.__mouse;
+	    var _this2 = this;
+
+	    var __raycaster = this.__raycaster,
+	        el = this.el,
+	        __mouse = this.__mouse;
 	    var scene = el.sceneEl.object3D;
 
 	    var camera = this.el.getObject3D('camera');
@@ -442,7 +456,7 @@
 	      /* get the closest three obj */
 	      var obj = void 0;
 	      intersects.every(function (item) {
-	        if (item.object.parent.visible === true) {
+	        if (item.object.parent.visible === true && _this2.__isElementInObjects(item.object.parent.el)) {
 	          obj = item.object;
 	          return false;
 	        } else {
@@ -517,6 +531,71 @@
 	    if (__intersectedEl) {
 	      __intersectedEl.emit(evt);
 	    }
+	  },
+
+
+	  /*===============================
+	  =       objects selection       =
+	  ===============================*/
+
+	  /**
+	   * @private
+	   */
+	  __refreshObjects: function __refreshObjects(e) {
+	    var self = this;
+	    this.objects = [];
+	    var selectedObjects = this.el.sceneEl.querySelectorAll(this.data.objects);
+	    selectedObjects.forEach(function (obj) {
+	      /* adding selected object to object list */
+	      self.__addElement(obj, self.data.recursive);
+	    });
+	  },
+
+	  /**
+	   * @private
+	   */
+	  __addElement: function __addElement(el, recursive) {
+	    var refreshObjects = this.__refreshObjects.bind(this);
+	    this.objects.push(el);
+	    if (recursive) {
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = el.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          var obj = _step.value;
+
+	          this.__addElement(obj, recursive);
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+
+	      ;
+	    }
+	  },
+
+
+	  /**
+	   * @private
+	   */
+	  __isElementInObjects: function __isElementInObjects(el) {
+	    for (var i = 0; i < this.objects.length; i++) {
+	      if (this.objects[i] === el) return true;
+	    }
+	    return false;
 	  }
 	});
 

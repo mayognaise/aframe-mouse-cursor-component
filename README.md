@@ -4,7 +4,7 @@ This is similar to `cursor` component besides the mouse behaves as cursor.
 
 For detail, please check [cursor page](https://aframe.io/docs/components/cursor.html).
 
-**[DEMO](https://mayognaise.github.io/aframe-mouse-cursor-component/basic/index.html)**
+**[DEMO](https://mayognaise.github.io/aframe-mouse-cursor-component/index.html)**
 
 ![example](example.gif)
 
@@ -80,7 +80,19 @@ import 'aframe'
 import 'aframe-mouse-cursor-component'
 ```
 
+### Contributions
+
+If you want to work on this component, take a fork of this branch, and submit a PR back.
+
+* To dev, run `npm run dev` in your terminal, and check your code at `http://localhost:8000`
+* To build (prior to PR) run `npm run build`
+
+
 ## Change log
+
+### 0.4.1
+
+- Now works accurately with scenes embedded in page
 
 ### 0.2.1
 

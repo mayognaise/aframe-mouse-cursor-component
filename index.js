@@ -17,15 +17,25 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @protected
 	 */
 	init () {
-		this.__raycaster = new THREE.Raycaster()
-		this.__mouse = new THREE.Vector2()
-		this.__isMobile = this.el.sceneEl.isMobile
-		this.__isStereo = false
-		this.__active = false
-		this.__isDown = false
-		this.__intersectedEl = null
-		this.__attachEventListeners()
-		this.__canvasSize = false
+		this._raycaster = new THREE.Raycaster()
+		this._mouse = new THREE.Vector2()
+		this._isMobile = this.el.sceneEl.isMobile
+		this._isStereo = false
+		this._active = false
+		this._isDown = false
+		this._intersectedEl = null
+		this._attachEventListeners()
+		this._canvasSize = false
+		/* bind functions */
+		this.__getCanvasPos = this._getCanvasPos.bind(this)
+		this.__getCanvasPos = this._getCanvasPos.bind(this)
+		this.__onEnterVR = this._onEnterVR.bind(this)
+		this.__onExitVR = this._onExitVR.bind(this)
+		this.__onDown = this._onDown.bind(this)
+		this.__onMouseMove = this._onMouseMove.bind(this)
+		this.__onRelease = this._onRelease.bind(this)
+		this.__onTouchMove = this._onTouchMove.bind(this)
+		this.__onComponentChanged = this._onComponentChanged.bind(this)
 	},
 
 	/**
@@ -42,8 +52,8 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @protected
 	 */
 	remove () {
-		this.__removeEventListeners()
-		this.__raycaster = null
+		this._removeEventListeners()
+		this._raycaster = null
 	},
 
 	/**
@@ -58,7 +68,7 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @protected
 	 */
 	pause () {
-		this.__active = false
+		this._active = false
 	},
 
 	/**
@@ -67,7 +77,7 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @protected
 	 */
 	play () {
-		this.__active = true
+		this._active = true
 	},
 
 	/*==============================
@@ -77,70 +87,71 @@ AFRAME.registerComponent('mouse-cursor', {
 	/**
 	 * @private
 	 */
-	__attachEventListeners () {
+	_attachEventListeners () {
 		const { el } = this
 		const { sceneEl } = el
 		const { canvas } = sceneEl
 		/* if canvas doesn't exist, listen for canvas to load. */
 		if (!canvas) {
-			el.sceneEl.addEventListener('render-target-loaded', this.__attachEventListeners.bind(this))
+			el.sceneEl.addEventListener('render-target-loaded', this._attachEventListeners.bind(this))
 			return
 		}
 
-		window.addEventListener('resize', this.__getCanvasPos.bind(this))
-		document.addEventListener('scroll', this.__getCanvasPos.bind(this))
-		/* update __canvas in case scene is embedded */
-		this.__getCanvasPos()
+		window.addEventListener('resize', this.__getCanvasPos)
+		document.addEventListener('scroll', this.__getCanvasPos)
+		/* update _canvas in case scene is embedded */
+		this._getCanvasPos()
 
 		/* scene */
-		sceneEl.addEventListener('enter-vr', this.__onEnterVR.bind(this))
-		sceneEl.addEventListener('exit-vr', this.__onExitVR.bind(this))
+		sceneEl.addEventListener('enter-vr', this.__onEnterVR)
+		sceneEl.addEventListener('exit-vr', this.__onExitVR)
 
 		/* Mouse Events */
-		canvas.addEventListener('mousedown', this.__onDown.bind(this))
-		canvas.addEventListener('mousemove', this.__onMouseMove.bind(this))
-		canvas.addEventListener('mouseup', this.__onRelease.bind(this))
-		canvas.addEventListener('mouseout', this.__onRelease.bind(this))
+		canvas.addEventListener('mousedown', this.__onDown)
+		canvas.addEventListener('mousemove', this.__onMouseMove)
+		canvas.addEventListener('mouseup', this.__onRelease)
+		canvas.addEventListener('mouseout', this.__onRelease)
 
 		/* Touch events */
-		canvas.addEventListener('touchstart', this.__onDown.bind(this))
-		canvas.addEventListener('touchmove', this.__onTouchMove.bind(this))
-		canvas.addEventListener('touchend', this.__onRelease.bind(this))
+		canvas.addEventListener('touchstart', this.__onDown)
+		canvas.addEventListener('touchmove', this.__onTouchMove)
+		canvas.addEventListener('touchend', this.__onRelease)
 
 		/* Element component change */
-		el.addEventListener('componentchanged', this.__onComponentChanged.bind(this))
+		el.addEventListener('componentchanged', this.__onComponentChanged)
 
 	},
 
 	/**
 	 * @private
 	 */
-	__removeEventListeners () {
+	_removeEventListeners () {
 		const { el } = this
 		const { sceneEl } = el
 		const { canvas } = sceneEl
 		if (!canvas) { return }
 
+		window.removeEventListener('resize', this.__getCanvasPos)
+		document.removeEventListener('scroll', this.__getCanvasPos)
+
 		/* scene */
-		sceneEl.removeEventListener('enter-vr', this.__onEnterVR.bind(this))
-		sceneEl.removeEventListener('exit-vr', this.__onExitVR.bind(this))
-		window.removeEventListener('resize', this.__getCanvasPos.bind(this))
-		document.removeEventListener('scroll', this.__getCanvasPos.bind(this))
+		sceneEl.removeEventListener('enter-vr', this.__onEnterVR)
+		sceneEl.removeEventListener('exit-vr', this.__onExitVR)
 
 
 		/* Mouse Events */
-		canvas.removeEventListener('mousedown', this.__onDown.bind(this))
-		canvas.removeEventListener('mousemove', this.__onMouseMove.bind(this))
-		canvas.removeEventListener('mouseup', this.__onRelease.bind(this))
-		canvas.removeEventListener('mouseout', this.__onRelease.bind(this))
+		canvas.removeEventListener('mousedown', this.__onDown)
+		canvas.removeEventListener('mousemove', this.__onMouseMove)
+		canvas.removeEventListener('mouseup', this.__onRelease)
+		canvas.removeEventListener('mouseout', this.__onRelease)
 
 		/* Touch events */
-		canvas.removeEventListener('touchstart', this.__onDown.bind(this))
-		canvas.removeEventListener('touchmove', this.__onTouchMove.bind(this))
-		canvas.removeEventListener('touchend', this.__onRelease.bind(this))
+		canvas.removeEventListener('touchstart', this.__onDown)
+		canvas.removeEventListener('touchmove', this.__onTouchMove)
+		canvas.removeEventListener('touchend', this.__onRelease)
 
 		/* Element component change */
-		el.removeEventListener('componentchanged', this.__onComponentChanged.bind(this))
+		el.removeEventListener('componentchanged', this.__onComponentChanged)
 
 	},
 
@@ -148,98 +159,98 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * Check if the mouse cursor is active
 	 * @private
 	 */
-	__isActive () {
-		return !!(this.__active || this.__raycaster)
+	_isActive () {
+		return !!(this._active || this._raycaster)
 	},
 
 	/**
 	 * @private
 	 */
-	__onDown (evt) {
-		if (!this.__isActive()) { return }
+	_onDown (evt) {
+		if (!this._isActive()) { return }
 
-		this.__isDown = true
+		this._isDown = true
 
-		this.__updateMouse(evt)
-		this.__updateIntersectObject()
+		this._updateMouse(evt)
+		this._updateIntersectObject()
 
-		if (!this.__isMobile) {
-			this.__setInitMousePosition(evt)
+		if (!this._isMobile) {
+			this._setInitMousePosition(evt)
 		}
 	},
 
 	/**
 	 * @private
 	 */
-	__onRelease () {
-		if (!this.__isActive()) { return }
+	_onRelease () {
+		if (!this._isActive()) { return }
 
 		/* check if mouse position has updated */
-		if (this.__defMousePosition) {
-			const defX = Math.abs(this.__initMousePosition.x - this.__defMousePosition.x)
-			const defY = Math.abs(this.__initMousePosition.y - this.__defMousePosition.y)
+		if (this._defMousePosition) {
+			const defX = Math.abs(this._initMousePosition.x - this._defMousePosition.x)
+			const defY = Math.abs(this._initMousePosition.y - this._defMousePosition.y)
 			const def = Math.max(defX, defY)
 			if (def > 0.04) {
 				/* mouse has moved too much to recognize as click. */
-				this.__isDown = false
+				this._isDown = false
 			}
 		}
 
-		if (this.__isDown && this.__intersectedEl) {
-			this.__emit('click')
+		if (this._isDown && this._intersectedEl) {
+			this._emit('click')
 		}
-		this.__isDown = false
-		this.__resetMousePosition()
+		this._isDown = false
+		this._resetMousePosition()
 	},
 
 	/**
 	 * @private
 	 */
-	__onMouseMove (evt) {
-		if (!this.__isActive()) { return }
+	_onMouseMove (evt) {
+		if (!this._isActive()) { return }
 
-		this.__updateMouse(evt)
-		this.__updateIntersectObject()
+		this._updateMouse(evt)
+		this._updateIntersectObject()
 
-		if (this.__isDown) {
-			this.__setMousePosition(evt)
+		if (this._isDown) {
+			this._setMousePosition(evt)
 		}
 	},
 
 	/**
 	 * @private
 	 */
-	__onTouchMove (evt) {
-		if (!this.__isActive()) { return }
+	_onTouchMove (evt) {
+		if (!this._isActive()) { return }
 
-		this.__isDown = false
+		this._isDown = false
 	},
 
 	/**
 	 * @private
 	 */
-	__onEnterVR () {
+	_onEnterVR () {
 		if (IS_VR_AVAILABLE) {
-			this.__isStereo = true
+			this._isStereo = true
 		}
-		this.__getCanvasPos()
+		this._getCanvasPos()
 	},
 
 	/**
 	 * @private
 	 */
-	__onExitVR () {
-		this.__isStereo = false
-		this.__getCanvasPos()
+	_onExitVR () {
+		this._isStereo = false
+		this._getCanvasPos()
 
 	},
 
 	/**
 	 * @private
 	 */
-	__onComponentChanged (evt) {
+	_onComponentChanged (evt) {
 		if (evt.detail.name === 'position') {
-			this.__updateIntersectObject()
+			this._updateIntersectObject()
 		}
 	},
 
@@ -253,11 +264,11 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * Get mouse position from size of canvas element
 	 * @private
 	 */
-	__getPosition (evt) {
-		const { width: w, height: h, left : offsetW, top : offsetH } = this.__canvasSize
+	_getPosition (evt) {
+		const { width: w, height: h, left : offsetW, top : offsetH } = this._canvasSize
 
 		let cx, cy
-		if (this.__isMobile) {
+		if (this._isMobile) {
 			const { touches } = evt
 			if (!touches || touches.length !== 1) { return }
 			const touch = touches[0]
@@ -273,7 +284,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		cx = cx - offsetW
 		cy = cy - offsetH
 
-		if (this.__isStereo) {
+		if (this._isStereo) {
 			cx = (cx % (w/2)) * 2
 		}
 
@@ -288,12 +299,12 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * Update mouse
 	 * @private
 	 */
-	__updateMouse (evt) {
-		const pos = this.__getPosition(evt)
+	_updateMouse (evt) {
+		const pos = this._getPosition(evt)
 		if (pos === null) { return }
 
-		this.__mouse.x = pos.x
-		this.__mouse.y = pos.y
+		this._mouse.x = pos.x
+		this._mouse.y = pos.y
 	},
 
 
@@ -301,20 +312,20 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * Update mouse position
 	 * @private
 	 */
-	__setMousePosition (evt) {
-		this.__defMousePosition = this.__getPosition(evt)
+	_setMousePosition (evt) {
+		this._defMousePosition = this._getPosition(evt)
 	},
 
 	/**
 	 * Update initial mouse position
 	 * @private
 	 */
-	__setInitMousePosition (evt) {
-		this.__initMousePosition = this.__getPosition(evt)
+	_setInitMousePosition (evt) {
+		this._initMousePosition = this._getPosition(evt)
 	},
 
-	__resetMousePosition () {
-		this.__initMousePosition = this.__defMousePosition = null
+	_resetMousePosition () {
+		this._initMousePosition = this._defMousePosition = null
 	},
 
 
@@ -326,24 +337,24 @@ AFRAME.registerComponent('mouse-cursor', {
 	/**
 	 * @private
 	 */
-	__getCanvasPos () {
-		this.__canvasSize = this.el.sceneEl.canvas.getBoundingClientRect() // update __canvas in case scene is embedded
+	_getCanvasPos () {
+		this._canvasSize = this.el.sceneEl.canvas.getBoundingClientRect() // update _canvas in case scene is embedded
 	},
 
 	/**
 	 * Get non group object3D
 	 * @private
 	 */
-	__getChildren (object3D) {
-		return object3D.children.map(obj => (obj.type === 'Group')? this.__getChildren(obj) : obj)
+	_getChildren (object3D) {
+		return object3D.children.map(obj => (obj.type === 'Group')? this._getChildren(obj) : obj)
 	},
 
 	/**
 	 * Get all non group object3D
 	 * @private
 	 */
-	__getAllChildren () {
-		const children = this.__getChildren(this.el.sceneEl.object3D)
+	_getAllChildren () {
+		const children = this._getChildren(this.el.sceneEl.object3D)
 		return flattenDeep(children)
 	},
 
@@ -355,19 +366,19 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * Update intersect element with cursor
 	 * @private
 	 */
-	__updateIntersectObject () {
-		const { __raycaster, el, __mouse } = this
+	_updateIntersectObject () {
+		const { _raycaster, el, _mouse } = this
 		const { object3D: scene } = el.sceneEl
 		const camera = this.el.getObject3D('camera')
-		this.__getAllChildren()
+		this._getAllChildren()
 		/* find intersections */
-		// __raycaster.setFromCamera(__mouse, camera) /* this somehow gets error so did the below */
-		__raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld)
-		__raycaster.ray.direction.set(__mouse.x, __mouse.y, 0.5).unproject(camera).sub(__raycaster.ray.origin).normalize()
+		// _raycaster.setFromCamera(_mouse, camera) /* this somehow gets error so did the below */
+		_raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld)
+		_raycaster.ray.direction.set(_mouse.x, _mouse.y, 0.5).unproject(camera).sub(_raycaster.ray.origin).normalize()
 
 		/* get objects intersected between mouse and camera */
-		const children = this.__getAllChildren()
-		const intersects = __raycaster.intersectObjects(children)
+		const children = this._getAllChildren()
+		const intersects = _raycaster.intersectObjects(children)
 
 		if (intersects.length > 0) {
 			/* get the closest three obj */
@@ -382,19 +393,19 @@ AFRAME.registerComponent('mouse-cursor', {
 				}
 			})
 			if (!obj) {
-				this.__clearIntersectObject()
+				this._clearIntersectObject()
 				return
 			}
 			/* get the entity */
 			const { el } = obj.parent
 			/* only updates if the object is not the activated object */
-			if (this.__intersectedEl === el) { return }
-			this.__clearIntersectObject()
+			if (this._intersectedEl === el) { return }
+			this._clearIntersectObject()
 			/* apply new object as intersected */
-			this.__setIntersectObject(el)
+			this._setIntersectObject(el)
 		}
 		else {
-			this.__clearIntersectObject()
+			this._clearIntersectObject()
 		}
 	},
 
@@ -403,10 +414,10 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @private
 	 * @param {AEntity} el `a-entity` element
 	 */
-	__setIntersectObject (el) {
+	_setIntersectObject (el) {
 
-		this.__intersectedEl = el
-		if (this.__isMobile) { return }
+		this._intersectedEl = el
+		if (this._isMobile) { return }
 		el.addState('hovered')
 		el.emit('mouseenter')
 		this.el.addState('hovering')
@@ -417,16 +428,16 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * Clear intersect element
 	 * @private
 	 */
-	__clearIntersectObject () {
+	_clearIntersectObject () {
 
-		const { __intersectedEl: el } = this
-		if (el && !this.__isMobile) {
+		const { _intersectedEl: el } = this
+		if (el && !this._isMobile) {
 			el.removeState('hovered')
 			el.emit('mouseleave')
 			this.el.removeState('hovering')
 		}
 
-		this.__intersectedEl = null
+		this._intersectedEl = null
 	},
 
 
@@ -438,10 +449,10 @@ AFRAME.registerComponent('mouse-cursor', {
 	/**
 	 * @private
 	 */
-	__emit (evt) {
-		const { __intersectedEl } = this
-		this.el.emit(evt, { target: __intersectedEl })
-		if (__intersectedEl) { __intersectedEl.emit(evt) }
+	_emit (evt) {
+		const { _intersectedEl } = this
+		this.el.emit(evt, { target: _intersectedEl })
+		if (_intersectedEl) { _intersectedEl.emit(evt) }
 	},
 
 })

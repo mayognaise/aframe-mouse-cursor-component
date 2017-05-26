@@ -412,6 +412,40 @@
 	    return (0, _lodash2.default)(children);
 	  },
 
+    /**
+     * Update list of objects to test for intersection.
+     * @private
+     */
+    __getUserDefinedObjects: function __getUserDefinedObjects(selector) {
+      var getChildren = this.__getChildren;
+      var objectEls;
+      var objects = [];
+
+      // Push meshes onto list of objects to intersect.
+      objectEls = this.el.sceneEl.querySelectorAll(selector);
+
+      objectEls.forEach(function(el) {
+        var elChildren = getChildren(el.object3D);
+        objects.push.apply(objects, elChildren);
+      });
+
+      return objects;
+    },
+
+    /**
+     * Get children
+     * @private
+     */
+    __getObjects: function __getObjects() {
+      var data = this.data;
+
+      if (data.objects && typeof data.objects === 'string' && data.objects.length) {
+         return this.__getUserDefinedObjects(data.objects)
+      }
+
+      return this.__getAllChildren()
+    },
+
 
 	  /*====================================
 	  =            intersection            =
@@ -435,8 +469,8 @@
 	    __raycaster.ray.direction.set(__mouse.x, __mouse.y, 0.5).unproject(camera).sub(__raycaster.ray.origin).normalize();
 
 	    /* get objects intersected between mouse and camera */
-	    var children = this.__getAllChildren();
-	    var intersects = __raycaster.intersectObjects(children);
+	    var objects = this.__getObjects();
+	    var intersects = __raycaster.intersectObjects(objects);
 
 	    if (intersects.length > 0) {
 	      /* get the closest three obj */

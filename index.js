@@ -272,8 +272,8 @@ AFRAME.registerComponent('mouse-cursor', {
 			const { touches } = evt
 			if (!touches || touches.length !== 1) { return }
 			const touch = touches[0]
-			cx = touch.pageX
-			cy = touch.pageY
+			cx = touch.clientX
+			cy = touch.clientY
 		}
 		else {
 			cx = evt.clientX
@@ -301,7 +301,7 @@ AFRAME.registerComponent('mouse-cursor', {
 	 */
 	_updateMouse (evt) {
 		const pos = this._getPosition(evt)
-		if (pos === null) { return }
+		if (!pos) { return }
 
 		this._mouse.x = pos.x
 		this._mouse.y = pos.y

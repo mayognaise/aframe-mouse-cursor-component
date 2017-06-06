@@ -1,5 +1,6 @@
 html {
   position: inherit !important;
+  font-family: monospace;
 }
 .buttons {
   position: absolute;

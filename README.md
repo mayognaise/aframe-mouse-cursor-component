@@ -39,6 +39,8 @@ The cursor will add states to the target entity on certain events.
 | click | Triggered when an entity is clicked. |
 | mouseenter | Triggered on mouseenter of the canvas. |
 | mouseleave | Triggered on mouseleave of the canvas. |
+| mousedown | Triggered on mousedown of the canvas. |
+| mouseup | Triggered on mouseup of the canvas. |
 
 For events, please check [demo page](https://mayognaise.github.io/aframe-mouse-cursor-component/basic/index.html).
 
@@ -89,6 +91,10 @@ If you want to work on this component, take a fork of this branch, and submit a 
 
 
 ## Change log
+
+### 0.5.1
+
+- Add ‘mousedown’ and ‘mouseup’ event
 
 ### 0.5.0
 

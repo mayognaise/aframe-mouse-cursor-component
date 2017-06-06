@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -69,15 +69,25 @@
 	  * @protected
 	  */
 		init: function init() {
-			this.__raycaster = new THREE.Raycaster();
-			this.__mouse = new THREE.Vector2();
-			this.__isMobile = this.el.sceneEl.isMobile;
-			this.__isStereo = false;
-			this.__active = false;
-			this.__isDown = false;
-			this.__intersectedEl = null;
-			this.__attachEventListeners();
-			this.__canvasSize = false;
+			this._raycaster = new THREE.Raycaster();
+			this._mouse = new THREE.Vector2();
+			this._isMobile = this.el.sceneEl.isMobile;
+			this._isStereo = false;
+			this._active = false;
+			this._isDown = false;
+			this._intersectedEl = null;
+			this._attachEventListeners();
+			this._canvasSize = false;
+			/* bind functions */
+			this.__getCanvasPos = this._getCanvasPos.bind(this);
+			this.__getCanvasPos = this._getCanvasPos.bind(this);
+			this.__onEnterVR = this._onEnterVR.bind(this);
+			this.__onExitVR = this._onExitVR.bind(this);
+			this.__onDown = this._onDown.bind(this);
+			this.__onMouseMove = this._onMouseMove.bind(this);
+			this.__onRelease = this._onRelease.bind(this);
+			this.__onTouchMove = this._onTouchMove.bind(this);
+			this.__onComponentChanged = this._onComponentChanged.bind(this);
 		},
 
 
@@ -95,8 +105,8 @@
 	  * @protected
 	  */
 		remove: function remove() {
-			this.__removeEventListeners();
-			this.__raycaster = null;
+			this._removeEventListeners();
+			this._raycaster = null;
 		},
 
 
@@ -112,7 +122,7 @@
 	  * @protected
 	  */
 		pause: function pause() {
-			this.__active = false;
+			this._active = false;
 		},
 
 
@@ -122,7 +132,7 @@
 	  * @protected
 	  */
 		play: function play() {
-			this.__active = true;
+			this._active = true;
 		},
 
 
@@ -133,46 +143,46 @@
 		/**
 	  * @private
 	  */
-		__attachEventListeners: function __attachEventListeners() {
+		_attachEventListeners: function _attachEventListeners() {
 			var el = this.el;
 			var sceneEl = el.sceneEl;
 			var canvas = sceneEl.canvas;
 			/* if canvas doesn't exist, listen for canvas to load. */
 
 			if (!canvas) {
-				el.sceneEl.addEventListener('render-target-loaded', this.__attachEventListeners.bind(this));
+				el.sceneEl.addEventListener('render-target-loaded', this._attachEventListeners.bind(this));
 				return;
 			}
 
-			window.addEventListener('resize', this.__getCanvasPos.bind(this));
-			document.addEventListener('scroll', this.__getCanvasPos.bind(this));
-			/* update __canvas in case scene is embedded */
-			this.__getCanvasPos();
+			window.addEventListener('resize', this.__getCanvasPos);
+			document.addEventListener('scroll', this.__getCanvasPos);
+			/* update _canvas in case scene is embedded */
+			this._getCanvasPos();
 
 			/* scene */
-			sceneEl.addEventListener('enter-vr', this.__onEnterVR.bind(this));
-			sceneEl.addEventListener('exit-vr', this.__onExitVR.bind(this));
+			sceneEl.addEventListener('enter-vr', this.__onEnterVR);
+			sceneEl.addEventListener('exit-vr', this.__onExitVR);
 
 			/* Mouse Events */
-			canvas.addEventListener('mousedown', this.__onDown.bind(this));
-			canvas.addEventListener('mousemove', this.__onMouseMove.bind(this));
-			canvas.addEventListener('mouseup', this.__onRelease.bind(this));
-			canvas.addEventListener('mouseout', this.__onRelease.bind(this));
+			canvas.addEventListener('mousedown', this.__onDown);
+			canvas.addEventListener('mousemove', this.__onMouseMove);
+			canvas.addEventListener('mouseup', this.__onRelease);
+			canvas.addEventListener('mouseout', this.__onRelease);
 
 			/* Touch events */
-			canvas.addEventListener('touchstart', this.__onDown.bind(this));
-			canvas.addEventListener('touchmove', this.__onTouchMove.bind(this));
-			canvas.addEventListener('touchend', this.__onRelease.bind(this));
+			canvas.addEventListener('touchstart', this.__onDown);
+			canvas.addEventListener('touchmove', this.__onTouchMove);
+			canvas.addEventListener('touchend', this.__onRelease);
 
 			/* Element component change */
-			el.addEventListener('componentchanged', this.__onComponentChanged.bind(this));
+			el.addEventListener('componentchanged', this.__onComponentChanged);
 		},
 
 
 		/**
 	  * @private
 	  */
-		__removeEventListeners: function __removeEventListeners() {
+		_removeEventListeners: function _removeEventListeners() {
 			var el = this.el;
 			var sceneEl = el.sceneEl;
 			var canvas = sceneEl.canvas;
@@ -181,25 +191,26 @@
 				return;
 			}
 
+			window.removeEventListener('resize', this.__getCanvasPos);
+			document.removeEventListener('scroll', this.__getCanvasPos);
+
 			/* scene */
-			sceneEl.removeEventListener('enter-vr', this.__onEnterVR.bind(this));
-			sceneEl.removeEventListener('exit-vr', this.__onExitVR.bind(this));
-			window.removeEventListener('resize', this.__getCanvasPos.bind(this));
-			document.removeEventListener('scroll', this.__getCanvasPos.bind(this));
+			sceneEl.removeEventListener('enter-vr', this.__onEnterVR);
+			sceneEl.removeEventListener('exit-vr', this.__onExitVR);
 
 			/* Mouse Events */
-			canvas.removeEventListener('mousedown', this.__onDown.bind(this));
-			canvas.removeEventListener('mousemove', this.__onMouseMove.bind(this));
-			canvas.removeEventListener('mouseup', this.__onRelease.bind(this));
-			canvas.removeEventListener('mouseout', this.__onRelease.bind(this));
+			canvas.removeEventListener('mousedown', this.__onDown);
+			canvas.removeEventListener('mousemove', this.__onMouseMove);
+			canvas.removeEventListener('mouseup', this.__onRelease);
+			canvas.removeEventListener('mouseout', this.__onRelease);
 
 			/* Touch events */
-			canvas.removeEventListener('touchstart', this.__onDown.bind(this));
-			canvas.removeEventListener('touchmove', this.__onTouchMove.bind(this));
-			canvas.removeEventListener('touchend', this.__onRelease.bind(this));
+			canvas.removeEventListener('touchstart', this.__onDown);
+			canvas.removeEventListener('touchmove', this.__onTouchMove);
+			canvas.removeEventListener('touchend', this.__onRelease);
 
 			/* Element component change */
-			el.removeEventListener('componentchanged', this.__onComponentChanged.bind(this));
+			el.removeEventListener('componentchanged', this.__onComponentChanged);
 		},
 
 
@@ -207,26 +218,26 @@
 	  * Check if the mouse cursor is active
 	  * @private
 	  */
-		__isActive: function __isActive() {
-			return !!(this.__active || this.__raycaster);
+		_isActive: function _isActive() {
+			return !!(this._active || this._raycaster);
 		},
 
 
 		/**
 	  * @private
 	  */
-		__onDown: function __onDown(evt) {
-			if (!this.__isActive()) {
+		_onDown: function _onDown(evt) {
+			if (!this._isActive()) {
 				return;
 			}
 
-			this.__isDown = true;
+			this._isDown = true;
 
-			this.__updateMouse(evt);
-			this.__updateIntersectObject();
+			this._updateMouse(evt);
+			this._updateIntersectObject();
 
-			if (!this.__isMobile) {
-				this.__setInitMousePosition(evt);
+			if (!this._isMobile) {
+				this._setInitMousePosition(evt);
 			}
 		},
 
@@ -234,43 +245,43 @@
 		/**
 	  * @private
 	  */
-		__onRelease: function __onRelease() {
-			if (!this.__isActive()) {
+		_onRelease: function _onRelease() {
+			if (!this._isActive()) {
 				return;
 			}
 
 			/* check if mouse position has updated */
-			if (this.__defMousePosition) {
-				var defX = Math.abs(this.__initMousePosition.x - this.__defMousePosition.x);
-				var defY = Math.abs(this.__initMousePosition.y - this.__defMousePosition.y);
+			if (this._defMousePosition) {
+				var defX = Math.abs(this._initMousePosition.x - this._defMousePosition.x);
+				var defY = Math.abs(this._initMousePosition.y - this._defMousePosition.y);
 				var def = Math.max(defX, defY);
 				if (def > 0.04) {
 					/* mouse has moved too much to recognize as click. */
-					this.__isDown = false;
+					this._isDown = false;
 				}
 			}
 
-			if (this.__isDown && this.__intersectedEl) {
-				this.__emit('click');
+			if (this._isDown && this._intersectedEl) {
+				this._emit('click');
 			}
-			this.__isDown = false;
-			this.__resetMousePosition();
+			this._isDown = false;
+			this._resetMousePosition();
 		},
 
 
 		/**
 	  * @private
 	  */
-		__onMouseMove: function __onMouseMove(evt) {
-			if (!this.__isActive()) {
+		_onMouseMove: function _onMouseMove(evt) {
+			if (!this._isActive()) {
 				return;
 			}
 
-			this.__updateMouse(evt);
-			this.__updateIntersectObject();
+			this._updateMouse(evt);
+			this._updateIntersectObject();
 
-			if (this.__isDown) {
-				this.__setMousePosition(evt);
+			if (this._isDown) {
+				this._setMousePosition(evt);
 			}
 		},
 
@@ -278,41 +289,41 @@
 		/**
 	  * @private
 	  */
-		__onTouchMove: function __onTouchMove(evt) {
-			if (!this.__isActive()) {
+		_onTouchMove: function _onTouchMove(evt) {
+			if (!this._isActive()) {
 				return;
 			}
 
-			this.__isDown = false;
+			this._isDown = false;
 		},
 
 
 		/**
 	  * @private
 	  */
-		__onEnterVR: function __onEnterVR() {
+		_onEnterVR: function _onEnterVR() {
 			if (IS_VR_AVAILABLE) {
-				this.__isStereo = true;
+				this._isStereo = true;
 			}
-			this.__getCanvasPos();
+			this._getCanvasPos();
 		},
 
 
 		/**
 	  * @private
 	  */
-		__onExitVR: function __onExitVR() {
-			this.__isStereo = false;
-			this.__getCanvasPos();
+		_onExitVR: function _onExitVR() {
+			this._isStereo = false;
+			this._getCanvasPos();
 		},
 
 
 		/**
 	  * @private
 	  */
-		__onComponentChanged: function __onComponentChanged(evt) {
+		_onComponentChanged: function _onComponentChanged(evt) {
 			if (evt.detail.name === 'position') {
-				this.__updateIntersectObject();
+				this._updateIntersectObject();
 			}
 		},
 
@@ -325,8 +336,8 @@
 	  * Get mouse position from size of canvas element
 	  * @private
 	  */
-		__getPosition: function __getPosition(evt) {
-			var _canvasSize = this.__canvasSize,
+		_getPosition: function _getPosition(evt) {
+			var _canvasSize = this._canvasSize,
 			    w = _canvasSize.width,
 			    h = _canvasSize.height,
 			    offsetW = _canvasSize.left,
@@ -335,25 +346,25 @@
 
 			var cx = void 0,
 			    cy = void 0;
-			if (this.__isMobile) {
+			if (this._isMobile) {
 				var touches = evt.touches;
 
 				if (!touches || touches.length !== 1) {
 					return;
 				}
 				var touch = touches[0];
-				cx = touch.pageX;
-				cy = touch.pageY;
+				cx = touch.clientX;
+				cy = touch.clientY;
 			} else {
 				cx = evt.clientX;
 				cy = evt.clientY;
 			}
 
-			// account for the offset if scene is embedded
+			/* account for the offset if scene is embedded */
 			cx = cx - offsetW;
 			cy = cy - offsetH;
 
-			if (this.__isStereo) {
+			if (this._isStereo) {
 				cx = cx % (w / 2) * 2;
 			}
 
@@ -368,14 +379,14 @@
 	  * Update mouse
 	  * @private
 	  */
-		__updateMouse: function __updateMouse(evt) {
-			var pos = this.__getPosition(evt);
-			if (pos === null) {
+		_updateMouse: function _updateMouse(evt) {
+			var pos = this._getPosition(evt);
+			if (!pos) {
 				return;
 			}
 
-			this.__mouse.x = pos.x;
-			this.__mouse.y = pos.y;
+			this._mouse.x = pos.x;
+			this._mouse.y = pos.y;
 		},
 
 
@@ -383,8 +394,8 @@
 	  * Update mouse position
 	  * @private
 	  */
-		__setMousePosition: function __setMousePosition(evt) {
-			this.__defMousePosition = this.__getPosition(evt);
+		_setMousePosition: function _setMousePosition(evt) {
+			this._defMousePosition = this._getPosition(evt);
 		},
 
 
@@ -392,11 +403,11 @@
 	  * Update initial mouse position
 	  * @private
 	  */
-		__setInitMousePosition: function __setInitMousePosition(evt) {
-			this.__initMousePosition = this.__getPosition(evt);
+		_setInitMousePosition: function _setInitMousePosition(evt) {
+			this._initMousePosition = this._getPosition(evt);
 		},
-		__resetMousePosition: function __resetMousePosition() {
-			this.__initMousePosition = this.__defMousePosition = null;
+		_resetMousePosition: function _resetMousePosition() {
+			this._initMousePosition = this._defMousePosition = null;
 		},
 
 
@@ -407,8 +418,8 @@
 		/**
 	  * @private
 	  */
-		__getCanvasPos: function __getCanvasPos() {
-			this.__canvasSize = this.el.sceneEl.canvas.getBoundingClientRect(); // update __canvas in case scene is embedded
+		_getCanvasPos: function _getCanvasPos() {
+			this._canvasSize = this.el.sceneEl.canvas.getBoundingClientRect(); // update _canvas in case scene is embedded
 		},
 
 
@@ -416,11 +427,11 @@
 	  * Get non group object3D
 	  * @private
 	  */
-		__getChildren: function __getChildren(object3D) {
+		_getChildren: function _getChildren(object3D) {
 			var _this = this;
 
 			return object3D.children.map(function (obj) {
-				return obj.type === 'Group' ? _this.__getChildren(obj) : obj;
+				return obj.type === 'Group' ? _this._getChildren(obj) : obj;
 			});
 		},
 
@@ -429,8 +440,8 @@
 	  * Get all non group object3D
 	  * @private
 	  */
-		__getAllChildren: function __getAllChildren() {
-			var children = this.__getChildren(this.el.sceneEl.object3D);
+		_getAllChildren: function _getAllChildren() {
+			var children = this._getChildren(this.el.sceneEl.object3D);
 			return (0, _lodash2.default)(children);
 		},
 
@@ -443,22 +454,22 @@
 	  * Update intersect element with cursor
 	  * @private
 	  */
-		__updateIntersectObject: function __updateIntersectObject() {
-			var __raycaster = this.__raycaster,
+		_updateIntersectObject: function _updateIntersectObject() {
+			var _raycaster = this._raycaster,
 			    el = this.el,
-			    __mouse = this.__mouse;
+			    _mouse = this._mouse;
 			var scene = el.sceneEl.object3D;
 
 			var camera = this.el.getObject3D('camera');
-			this.__getAllChildren();
+			this._getAllChildren();
 			/* find intersections */
-			// __raycaster.setFromCamera(__mouse, camera) /* this somehow gets error so did the below */
-			__raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld);
-			__raycaster.ray.direction.set(__mouse.x, __mouse.y, 0.5).unproject(camera).sub(__raycaster.ray.origin).normalize();
+			// _raycaster.setFromCamera(_mouse, camera) /* this somehow gets error so did the below */
+			_raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld);
+			_raycaster.ray.direction.set(_mouse.x, _mouse.y, 0.5).unproject(camera).sub(_raycaster.ray.origin).normalize();
 
 			/* get objects intersected between mouse and camera */
-			var children = this.__getAllChildren();
-			var intersects = __raycaster.intersectObjects(children);
+			var children = this._getAllChildren();
+			var intersects = _raycaster.intersectObjects(children);
 
 			if (intersects.length > 0) {
 				/* get the closest three obj */
@@ -472,21 +483,21 @@
 					}
 				});
 				if (!obj) {
-					this.__clearIntersectObject();
+					this._clearIntersectObject();
 					return;
 				}
 				/* get the entity */
 				var _el = obj.parent.el;
 				/* only updates if the object is not the activated object */
 
-				if (this.__intersectedEl === _el) {
+				if (this._intersectedEl === _el) {
 					return;
 				}
-				this.__clearIntersectObject();
+				this._clearIntersectObject();
 				/* apply new object as intersected */
-				this.__setIntersectObject(_el);
+				this._setIntersectObject(_el);
 			} else {
-				this.__clearIntersectObject();
+				this._clearIntersectObject();
 			}
 		},
 
@@ -496,10 +507,9 @@
 	  * @private
 	  * @param {AEntity} el `a-entity` element
 	  */
-		__setIntersectObject: function __setIntersectObject(el) {
-
-			this.__intersectedEl = el;
-			if (this.__isMobile) {
+		_setIntersectObject: function _setIntersectObject(el) {
+			this._intersectedEl = el;
+			if (this._isMobile) {
 				return;
 			}
 			el.addState('hovered');
@@ -512,16 +522,16 @@
 	  * Clear intersect element
 	  * @private
 	  */
-		__clearIntersectObject: function __clearIntersectObject() {
-			var el = this.__intersectedEl;
+		_clearIntersectObject: function _clearIntersectObject() {
+			var el = this._intersectedEl;
 
-			if (el && !this.__isMobile) {
+			if (el && !this._isMobile) {
 				el.removeState('hovered');
 				el.emit('mouseleave');
 				this.el.removeState('hovering');
 			}
 
-			this.__intersectedEl = null;
+			this._intersectedEl = null;
 		},
 
 
@@ -532,19 +542,19 @@
 		/**
 	  * @private
 	  */
-		__emit: function __emit(evt) {
-			var __intersectedEl = this.__intersectedEl;
+		_emit: function _emit(evt) {
+			var _intersectedEl = this._intersectedEl;
 
-			this.el.emit(evt, { target: __intersectedEl });
-			if (__intersectedEl) {
-				__intersectedEl.emit(evt);
+			this.el.emit(evt, { target: _intersectedEl });
+			if (_intersectedEl) {
+				_intersectedEl.emit(evt);
 			}
 		}
 	});
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * lodash (Custom Build) <https://lodash.com/>
@@ -899,5 +909,5 @@
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ }
+/***/ })
 /******/ ]);

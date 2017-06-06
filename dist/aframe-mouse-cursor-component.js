@@ -239,6 +239,9 @@
 			if (!this._isMobile) {
 				this._setInitMousePosition(evt);
 			}
+			if (this._intersectedEl) {
+				this._emit('mousedown');
+			}
 		},
 
 
@@ -262,7 +265,10 @@
 			}
 
 			if (this._isDown && this._intersectedEl) {
-				this._emit('click');
+				if (this._isDown) {
+					this._emit('click');
+				}
+				this._emit('mouseup');
 			}
 			this._isDown = false;
 			this._resetMousePosition();

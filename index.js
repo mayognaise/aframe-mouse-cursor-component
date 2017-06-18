@@ -32,6 +32,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		this.__onEnterVR = this._onEnterVR.bind(this)
 		this.__onExitVR = this._onExitVR.bind(this)
 		this.__onDown = this._onDown.bind(this)
+		this.__onClick = this._onClick.bind(this)
 		this.__onMouseMove = this._onMouseMove.bind(this)
 		this.__onRelease = this._onRelease.bind(this)
 		this.__onTouchMove = this._onTouchMove.bind(this)
@@ -106,7 +107,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		sceneEl.addEventListener('enter-vr', this.__onEnterVR)
 		sceneEl.addEventListener('exit-vr', this.__onExitVR)
 
-		/* Mouse Events */
+		/* Mouse events */
 		canvas.addEventListener('mousedown', this.__onDown)
 		canvas.addEventListener('mousemove', this.__onMouseMove)
 		canvas.addEventListener('mouseup', this.__onRelease)
@@ -116,6 +117,9 @@ AFRAME.registerComponent('mouse-cursor', {
 		canvas.addEventListener('touchstart', this.__onDown)
 		canvas.addEventListener('touchmove', this.__onTouchMove)
 		canvas.addEventListener('touchend', this.__onRelease)
+
+		/* Click event */
+		canvas.addEventListener('click', this.__onClick)
 
 		/* Element component change */
 		el.addEventListener('componentchanged', this.__onComponentChanged)
@@ -139,7 +143,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		sceneEl.removeEventListener('exit-vr', this.__onExitVR)
 
 
-		/* Mouse Events */
+		/* Mouse events */
 		canvas.removeEventListener('mousedown', this.__onDown)
 		canvas.removeEventListener('mousemove', this.__onMouseMove)
 		canvas.removeEventListener('mouseup', this.__onRelease)
@@ -149,6 +153,9 @@ AFRAME.registerComponent('mouse-cursor', {
 		canvas.removeEventListener('touchstart', this.__onDown)
 		canvas.removeEventListener('touchmove', this.__onTouchMove)
 		canvas.removeEventListener('touchend', this.__onRelease)
+
+		/* Click event */
+		canvas.removeEventListener('click', this.__onClick)
 
 		/* Element component change */
 		el.removeEventListener('componentchanged', this.__onComponentChanged)
@@ -185,6 +192,20 @@ AFRAME.registerComponent('mouse-cursor', {
 	/**
 	 * @private
 	 */
+	_onClick (evt) {
+		if (!this._isActive()) { return }
+
+		this._updateMouse(evt)
+		this._updateIntersectObject()
+
+		if (this._intersectedEl) {
+			this._emit('click')
+		}
+	},
+
+	/**
+	 * @private
+	 */
 	_onRelease () {
 		if (!this._isActive()) { return }
 
@@ -200,9 +221,6 @@ AFRAME.registerComponent('mouse-cursor', {
 		}
 
 		if (this._isDown && this._intersectedEl) {
-			if(this._isDown) {
-				this._emit('click')
-			}
 			this._emit('mouseup')
 		}
 		this._isDown = false

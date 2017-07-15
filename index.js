@@ -10,7 +10,11 @@ const IS_VR_AVAILABLE = AFRAME.utils.device.isMobile() || window.hasNonPolyfillW
  * Mouse Cursor Component for A-Frame.
  */
 AFRAME.registerComponent('mouse-cursor', {
-	schema: { },
+	schema: { // match defaults of the a-cursor component
+		far: {default: Infinity},
+		interval: {default: 100},
+		objects: {default: ''},
+	},
 
 	/**
 	 * Called once when component is attached. Generally for initial setup.
@@ -44,6 +48,10 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @protected
 	 */
 	update (oldData) {
+		// our properties are for the raycaster, just like a-cursor
+		this._raycaster.far = this.data.far;
+		this._raycaster.interval = this.data.interval;
+		this._raycaster.objects = this.data.objects;
 	},
 
 	/**
@@ -360,7 +368,20 @@ AFRAME.registerComponent('mouse-cursor', {
 	 * @private
 	 */
 	_getAllChildren () {
-		const children = this._getChildren(this.el.sceneEl.object3D)
+		// !!! copied this filtering logic from the A-Frame
+		// raycaster component, so perhaps we should refactor
+		// to use one directly instead of a THREE.Raycaster
+		var children;
+		var i;
+		if (this._raycaster.objects) {
+			children = [];
+			var targetEls = this.el.sceneEl.querySelectorAll(this._raycaster.objects);
+			for (i = 0; i < targetEls.length; i++) {
+				children.push(this._getChildren(targetEls[i].object3D));
+			}
+		} else {
+			children = this._getChildren(this.el.sceneEl.object3D);
+		}
 		return flattenDeep(children)
 	},
 
@@ -376,15 +397,13 @@ AFRAME.registerComponent('mouse-cursor', {
 		const { _raycaster, el, _mouse } = this
 		const { object3D: scene } = el.sceneEl
 		const camera = this.el.getObject3D('camera')
-		this._getAllChildren()
 		/* find intersections */
 		// _raycaster.setFromCamera(_mouse, camera) /* this somehow gets error so did the below */
 		_raycaster.ray.origin.setFromMatrixPosition(camera.matrixWorld)
 		_raycaster.ray.direction.set(_mouse.x, _mouse.y, 0.5).unproject(camera).sub(_raycaster.ray.origin).normalize()
 
 		/* get objects intersected between mouse and camera */
-		const children = this._getAllChildren()
-		const intersects = _raycaster.intersectObjects(children)
+		const intersects = _raycaster.intersectObjects(this._getAllChildren());
 
 		if (intersects.length > 0) {
 			/* get the closest three obj */

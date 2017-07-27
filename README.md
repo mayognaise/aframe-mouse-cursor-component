@@ -1,5 +1,7 @@
 # A-Frame Mouse Cursor Component
 
+> This feature is now available in A-Frame v0.6.1 by setting `<a-scene cursor="rayOrigin: mouse">`.
+
 This is similar to `cursor` component besides the mouse behaves as cursor.
 
 For detail, please check [cursor page](https://aframe.io/docs/components/cursor.html).

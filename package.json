@@ -26,11 +26,13 @@
     "webvr"
   ],
   "author": "Mayo Tobita <tobimayo@gmail.com>",
-  "contributors": [{
-    "name" : "Leigh Garland",
-    "email" : "leigh@studiozero.co",
-    "url" : "http://studiozero.co"
-  }],
+  "contributors": [
+    {
+      "name": "Leigh Garland",
+      "email": "leigh@studiozero.co",
+      "url": "http://studiozero.co"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mayognaise/aframe-mouse-cursor-component/issues"

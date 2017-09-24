@@ -24,7 +24,7 @@ AFRAME.registerComponent('mouse-cursor', {
 		this._active = false
 		this._isDown = false
 		this._intersectedEl = null
-		this._attachEventListeners()
+
 		this._canvasSize = false
 		/* bind functions */
 		this.__getCanvasPos = this._getCanvasPos.bind(this)
@@ -37,6 +37,9 @@ AFRAME.registerComponent('mouse-cursor', {
 		this.__onRelease = this._onRelease.bind(this)
 		this.__onTouchMove = this._onTouchMove.bind(this)
 		this.__onComponentChanged = this._onComponentChanged.bind(this)
+		this.__onRenderTargetLoaded = this._onRenderTargetLoaded.bind(this)
+
+		this.el.sceneEl.addEventListener('renderstart', this.__onRenderTargetLoaded, false);
 	},
 
 	/**
@@ -88,15 +91,18 @@ AFRAME.registerComponent('mouse-cursor', {
 	/**
 	 * @private
 	 */
+	_onRenderTargetLoaded () {
+		this.el.sceneEl.removeEventListener('renderstart', this.__onRenderTargetLoaded, false);
+		this.canvasEl = this.el.sceneEl.canvas;
+		this._attachEventListeners();
+	},
+
+	/**
+	 * @private
+	 */
 	_attachEventListeners () {
 		const { el } = this
 		const { sceneEl } = el
-		const { canvas } = sceneEl
-		/* if canvas doesn't exist, listen for canvas to load. */
-		if (!canvas) {
-			el.sceneEl.addEventListener('render-target-loaded', this._attachEventListeners.bind(this))
-			return
-		}
 
 		window.addEventListener('resize', this.__getCanvasPos)
 		document.addEventListener('scroll', this.__getCanvasPos)
@@ -108,21 +114,23 @@ AFRAME.registerComponent('mouse-cursor', {
 		sceneEl.addEventListener('exit-vr', this.__onExitVR)
 
 		/* Mouse events */
-		canvas.addEventListener('mousedown', this.__onDown)
-		canvas.addEventListener('mousemove', this.__onMouseMove)
-		canvas.addEventListener('mouseup', this.__onRelease)
-		canvas.addEventListener('mouseout', this.__onRelease)
+		this.canvasEl.addEventListener('mousedown', this.__onDown)
+		this.canvasEl.addEventListener('mousemove', this.__onMouseMove)
+		this.canvasEl.addEventListener('mouseup', this.__onRelease)
+		this.canvasEl.addEventListener('mouseout', this.__onRelease)
 
 		/* Touch events */
-		canvas.addEventListener('touchstart', this.__onDown)
-		canvas.addEventListener('touchmove', this.__onTouchMove)
-		canvas.addEventListener('touchend', this.__onRelease)
+		this.canvasEl.addEventListener('touchstart', this.__onDown)
+		this.canvasEl.addEventListener('touchmove', this.__onTouchMove)
+		this.canvasEl.addEventListener('touchend', this.__onRelease)
 
 		/* Click event */
-		canvas.addEventListener('click', this.__onClick)
+		this.canvasEl.addEventListener('click', this.__onClick)
 
 		/* Element component change */
 		el.addEventListener('componentchanged', this.__onComponentChanged)
+
+		console.log('Added event listeners');
 
 	},
 
@@ -132,8 +140,7 @@ AFRAME.registerComponent('mouse-cursor', {
 	_removeEventListeners () {
 		const { el } = this
 		const { sceneEl } = el
-		const { canvas } = sceneEl
-		if (!canvas) { return }
+		if (!sceneEl) { return }
 
 		window.removeEventListener('resize', this.__getCanvasPos)
 		document.removeEventListener('scroll', this.__getCanvasPos)
@@ -144,18 +151,18 @@ AFRAME.registerComponent('mouse-cursor', {
 
 
 		/* Mouse events */
-		canvas.removeEventListener('mousedown', this.__onDown)
-		canvas.removeEventListener('mousemove', this.__onMouseMove)
-		canvas.removeEventListener('mouseup', this.__onRelease)
-		canvas.removeEventListener('mouseout', this.__onRelease)
+		this.canvasEl.removeEventListener('mousedown', this.__onDown)
+		this.canvasEl.removeEventListener('mousemove', this.__onMouseMove)
+		this.canvasEl.removeEventListener('mouseup', this.__onRelease)
+		this.canvasEl.removeEventListener('mouseout', this.__onRelease)
 
 		/* Touch events */
-		canvas.removeEventListener('touchstart', this.__onDown)
-		canvas.removeEventListener('touchmove', this.__onTouchMove)
-		canvas.removeEventListener('touchend', this.__onRelease)
+		this.canvasEl.removeEventListener('touchstart', this.__onDown)
+		this.canvasEl.removeEventListener('touchmove', this.__onTouchMove)
+		this.canvasEl.removeEventListener('touchend', this.__onRelease)
 
 		/* Click event */
-		canvas.removeEventListener('click', this.__onClick)
+		this.canvasEl.removeEventListener('click', this.__onClick)
 
 		/* Element component change */
 		el.removeEventListener('componentchanged', this.__onComponentChanged)

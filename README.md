@@ -64,7 +64,7 @@ Install and use by directly including the [browser files](dist):
 
 <body>
   <a-scene>
-    <a-entity camera look-controls mouse-cursor>
+    <a-entity camera look-controls mouse-cursor></a-entity>
   </a-scene>
 </body>
 ```

@@ -1,6 +1,6 @@
 {
   "name": "aframe-mouse-cursor-component",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "A-Frame Mouse Cursor Component for A-Frame VR.",
   "main": "dist/aframe-mouse-cursor-component.js",
   "scripts": {
